@@ -1,3 +1,5 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 class Course {
   final String courseId;
   final String courseName;
@@ -17,6 +19,11 @@ class Course {
     );
   }
 
+  factory Course.fromDocument(DocumentSnapshot doc) {
+    final data = doc.data() as Map<String, dynamic>;
+    return Course.fromMap(data);
+  }
+
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -33,6 +40,7 @@ class Course {
     return {
       'courseId': courseId,
       'courseName': courseName,
+      'courseFullName': courseFullName,
     };
   }
 }

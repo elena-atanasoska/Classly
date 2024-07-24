@@ -30,6 +30,22 @@ class CustomUser {
     );
   }
 
+  factory CustomUser.fromDocument(DocumentSnapshot document) {
+    final data = document.data() as Map<String, dynamic>;
+    final enrolledCoursesData = data['enrolledCourses'] as List<dynamic>?;
+
+    return CustomUser(
+      uid: document.id,
+      email: data['email'] ?? '',
+      firstName: data['firstName'] ?? '',
+      lastName: data['lastName'] ?? '',
+      photoURL: data['photoURL'] ?? '',
+      enrolledCourses: enrolledCoursesData != null
+          ? enrolledCoursesData.map((courseData) => Course.fromMap(courseData as Map<String, dynamic>)).toList()
+          : [],
+    );
+  }
+
   Map<String, dynamic> toMap() {
     return {
       'uid': uid,
@@ -41,7 +57,7 @@ class CustomUser {
     };
   }
 
-  getFullName() {
+  String getFullName() {
     return '$firstName $lastName';
   }
 
