@@ -29,7 +29,7 @@ class _AddEventDialogState extends State<AddEventDialog> {
 
   Future<List<Course>> _fetchAvailableCourses() async {
     final courseService = CourseService();
-    return await courseService.fetchAvailableCourses();
+    return await courseService.getAvailableCourses();
   }
 
   @override

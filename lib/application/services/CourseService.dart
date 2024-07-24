@@ -1,26 +1,12 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:classly/data/repositories/CourseRepository.dart';
 
 import '../../domain/models/Course.dart';
 
 class CourseService {
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final CourseRepository _repository = CourseRepository();
 
-  Future<List<Course>> fetchAvailableCourses() async {
-    try {
-      QuerySnapshot querySnapshot =
-      await _firestore.collection('courses').get();
 
-      List<Course> courses = querySnapshot.docs.map((DocumentSnapshot document) {
-        return Course(
-            courseId: document.id,
-            courseName: document['courseName'] ?? '',
-            courseFullName: document['courseFullName'] ?? '');
-      }).toList();
-
-      return courses;
-    } catch (error) {
-      print('Error fetching courses: $error');
-      throw error;
-    }
+  Future<List<Course>> getAvailableCourses() async {
+    return await _repository.fetchAvailableCourses();
   }
 }
