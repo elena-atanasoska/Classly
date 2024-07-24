@@ -37,4 +37,14 @@ class UserRepository {
       'enrolledCourses': FieldValue.arrayRemove(coursesToDisenroll),
     });
   }
+
+  Future<List<CustomUser>> getAllUsers() async {
+    try {
+      QuerySnapshot snapshot = await _firestore.collection('custom_users').get();
+      return snapshot.docs.map((doc) => CustomUser.fromDocument(doc)).toList();
+    } catch (e) {
+      print('Error fetching users: $e');
+      throw Exception('Failed to load users');
+    }
+  }
 }

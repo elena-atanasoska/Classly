@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
-import 'Course.dart';
+import '../enum/UserRole.dart';
 
 class CustomUser {
   final String uid;
@@ -9,7 +9,8 @@ class CustomUser {
   final String firstName;
   final String lastName;
   late final String photoURL;
-  List<Course> enrolledCourses;
+  List<String> enrolledCourses;
+  UserRole role;
 
   CustomUser({
     required this.uid,
@@ -17,7 +18,8 @@ class CustomUser {
     required this.firstName,
     required this.lastName,
     required this.photoURL,
-    List<Course>? enrolledCourses,
+    List<String>? enrolledCourses,
+    required this.role,
   }) : enrolledCourses = enrolledCourses ?? [];
 
   factory CustomUser.fromFirebaseUser(User user) {
@@ -27,12 +29,27 @@ class CustomUser {
       firstName: user.displayName?.split(' ')[0] ?? '',
       lastName: user.displayName?.split(' ')[1] ?? '',
       photoURL: user.photoURL ?? '',
+      role: UserRole.STUDENT,
     );
   }
 
   factory CustomUser.fromDocument(DocumentSnapshot document) {
     final data = document.data() as Map<String, dynamic>;
+
     final enrolledCoursesData = data['enrolledCourses'] as List<dynamic>?;
+
+    final roleString = data['role'] as String;
+    UserRole role;
+
+    switch (roleString) {
+      case 'UserRole.PROFESSOR':
+        role = UserRole.PROFESSOR;
+        break;
+      case 'UserRole.STUDENT':
+      default:
+        role = UserRole.STUDENT;
+        break;
+    }
 
     return CustomUser(
       uid: document.id,
@@ -41,10 +58,12 @@ class CustomUser {
       lastName: data['lastName'] ?? '',
       photoURL: data['photoURL'] ?? '',
       enrolledCourses: enrolledCoursesData != null
-          ? enrolledCoursesData.map((courseData) => Course.fromMap(courseData as Map<String, dynamic>)).toList()
+          ? List<String>.from(enrolledCoursesData) // Ensure it's a List<String>
           : [],
+      role: role,
     );
   }
+
 
   Map<String, dynamic> toMap() {
     return {
@@ -53,7 +72,8 @@ class CustomUser {
       'firstName': firstName,
       'lastName': lastName,
       'photoURL': photoURL,
-      'enrolledCourses': enrolledCourses.map((course) => course.toMap()).toList(),
+      'enrolledCourses': enrolledCourses,
+      'role': role,
     };
   }
 
@@ -61,12 +81,12 @@ class CustomUser {
     return '$firstName $lastName';
   }
 
-  void enrollInCourse(Course course) {
-    enrolledCourses.add(course);
+  void enrollInCourse(String courseId) {
+    enrolledCourses.add(courseId);
   }
 
-  bool isEnrolledInCourse(Course course) {
-    return enrolledCourses.contains(course);
+  bool isEnrolledInCourse(String courseId) {
+    return enrolledCourses.contains(courseId);
   }
 
   Future<void> updateProfileImage(String newImageUrl) async {
@@ -76,4 +96,6 @@ class CustomUser {
       'photoURL': newImageUrl,
     });
   }
+
+  bool get isProfessor => role == UserRole.PROFESSOR;
 }

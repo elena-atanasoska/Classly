@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../../domain/models/Course.dart';
 import '../../domain/models/CustomUser.dart';
+import '../../domain/enum/UserRole.dart';
 
 class UserService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -82,6 +83,42 @@ class UserService {
     } catch (error) {
       print('Error enrolling in courses: $error');
       throw Exception('Error enrolling in courses: $error');
+    }
+  }
+
+  Future<List<CustomUser>> getAllUsers() async {
+    try {
+      QuerySnapshot snapshot = await _firestore.collection('custom_users').get();
+
+      List<CustomUser> users = snapshot.docs.map((doc) {
+        return CustomUser.fromDocument(doc);
+      }).toList();
+
+      return users;
+    } catch (e) {
+      print('Error fetching users: $e');
+      throw Exception('Failed to load users');
+    }
+  }
+  Future<void> updateUserRole(String uid, String newRole) async {
+    try {
+      UserRole roleEnum;
+      switch (newRole.toUpperCase()) {
+        case 'PROFESSOR':
+          roleEnum = UserRole.PROFESSOR;
+          break;
+        case 'STUDENT':
+        default:
+          roleEnum = UserRole.STUDENT;
+          break;
+      }
+
+      await _firestore.collection('custom_users').doc(uid).update({
+        'role': roleEnum.index,
+      });
+    } catch (e) {
+      print('Error updating user role: $e');
+      throw Exception('Failed to update user role');
     }
   }
 }

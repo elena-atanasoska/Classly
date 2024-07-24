@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:classly/domain/enum/UserRole.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
@@ -29,6 +30,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   List<Course> _availableCourses = [];
   List<Course> _selectedCourses = [];
   Uint8List? _profileImage;
+  List<CustomUser> _allUsers = [];
 
   @override
   void initState() {
@@ -36,6 +38,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     _updateUser();
     _fetchEnrolledCourses();
     _fetchAvailableCourses();
+    _fetchAllUsers();
     _auth.authStateChanges().listen((User? user) {});
   }
 
@@ -87,12 +90,65 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
   }
 
+  void _fetchAllUsers() async {
+    try {
+      List<CustomUser> users = await _userService.getAllUsers();
+      setState(() {
+        _allUsers = users;
+      });
+    } catch (error) {
+      print('Error fetching users: $error');
+    }
+  }
+
   void _logout() async {
     await FirebaseAuth.instance.signOut();
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(builder: (context) => LoginScreen(_firebaseService)),
     );
+  }
+
+  void _showUserManagement() {
+    showModalBottomSheet(
+      context: context,
+      builder: (BuildContext context) {
+        return ListView.builder(
+          itemCount: _allUsers.length,
+          itemBuilder: (context, index) {
+            CustomUser user = _allUsers[index];
+            return ListTile(
+              title: Text(user.getFullName() ?? 'No name available'),
+              subtitle: Text(user.email ?? 'No email available'),
+              trailing: DropdownButton<String>(
+                value: user.role.name,
+                onChanged: (String? newRole) {
+                  if (newRole != null) {
+                    _updateUserRole(user.uid, newRole);
+                  }
+                },
+                items: <String>['Student', 'Professor', 'Admin']
+                    .map<DropdownMenuItem<String>>((String value) {
+                  return DropdownMenuItem<String>(
+                    value: value,
+                    child: Text(value),
+                  );
+                }).toList(),
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  void _updateUserRole(String userId, String newRole) async {
+    try {
+      await _userService.updateUserRole(userId, newRole);
+      _fetchAllUsers();
+    } catch (error) {
+      print('Error updating user role: $error');
+    }
   }
 
   @override
@@ -146,12 +202,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
               style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.blue),
             ),
             SizedBox(height: 8),
-            for (Course course in _enrolledCourses)
-              Text(
-                course.courseFullName,
-                style: TextStyle(fontSize: 20, color: Colors.black),
-              ),
+            ..._enrolledCourses.map((course) => Text(
+              course.courseFullName,
+              style: TextStyle(fontSize: 20, color: Colors.black),
+            )),
             SizedBox(height: 16),
+            if (_user?.isProfessor==true) ...[
+              ElevatedButton(
+                onPressed: _showUserManagement,
+                child: Text('Manage Users'),
+              ),
+            ],
           ],
         ),
       ),
@@ -223,89 +284,49 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   Future<void> _uploadProfileImageAndSetUser(File imageFile) async {
     try {
-      if (_user != null) {
-        String imageUrl = await _uploadProfileImageToStorage(imageFile);
+      final storageRef = FirebaseStorage.instance.ref().child('profile_images/${_user!.uid}');
+      final uploadTask = storageRef.putFile(imageFile);
 
-        if (imageUrl.isNotEmpty) {
-          await _userService.updateUserProfileImage(_user!.uid, imageUrl);
+      final snapshot = await uploadTask.whenComplete(() {});
+      final downloadUrl = await snapshot.ref.getDownloadURL();
 
-          setState(() {
-            _user!.photoURL = imageUrl;
-            _profileImage = MemoryImage(imageFile.readAsBytesSync()) as Uint8List?;
-          });
+      setState(() {
+        _profileImage = Uint8List.fromList(imageFile.readAsBytesSync());
+      });
 
-          print('Profile image uploaded and user profile updated');
-        } else {
-          print('Image URL is empty after upload');
-        }
-      } else {
-        print('User object is null in _uploadProfileImageAndSetUser');
-      }
+      await _userService.updateUserProfileImage(_user!.uid, downloadUrl);
     } catch (error) {
       print('Error uploading profile image: $error');
     }
   }
 
-  Future<String> _uploadProfileImageToStorage(File imageFile) async {
-    try {
-      String fileName = 'profile_images/${_user!.uid}.png';
-      print('Storage Path: $fileName');
-
-      Reference storageReference =
-      FirebaseStorage.instance.ref().child(fileName);
-
-      UploadTask uploadTask = storageReference.putFile(imageFile);
-      await uploadTask.whenComplete(() => print('Profile image uploaded'));
-
-      return await storageReference.getDownloadURL();
-    } catch (error) {
-      print('Error uploading profile image to storage: $error');
-      return '';
-    }
-  }
-
-  Future<void> _showEnrollmentDialog(BuildContext context) async {
-    List<Course> availableCoursesCopy = List.from(_availableCourses);
-    _fetchEnrolledCourses();
-    for (Course enrolledCourse in _enrolledCourses) {
-      int index = availableCoursesCopy.indexWhere(
-            (course) => course.courseId == enrolledCourse.courseId,
-      );
-      print('Index: $index');
-      if (index != -1) {
-        _selectedCourses.add(enrolledCourse);
-      }
-    }
-
-    return showDialog<void>(
+  void _showEnrollmentDialog(BuildContext context) {
+    showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Available Courses'),
-          content: StatefulBuilder(
-            builder: (BuildContext context, StateSetter setState) {
-              return SingleChildScrollView(
-                child: ListBody(
-                  children: availableCoursesCopy.map((Course course) {
-                    return CheckboxListTile(
-                      title: Text(course.courseName),
-                      value: _selectedCourses.contains(course),
-                      onChanged: (bool? value) {
-                        setState(() {
-                          if (value != null && value) {
-                            _selectedCourses.add(course);
-                          } else {
-                            _selectedCourses.remove(course);
-                          }
-                        });
-                      },
-                    );
-                  }).toList(),
-                ),
-              );
-            },
+          title: Text('Enroll in Courses'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ..._availableCourses.map((course) => CheckboxListTile(
+                title: Text(course.courseFullName),
+                value: _selectedCourses.contains(course),
+                onChanged: (bool? selected) {
+                  setState(() {
+                    if (selected != null) {
+                      if (selected) {
+                        _selectedCourses.add(course);
+                      } else {
+                        _selectedCourses.remove(course);
+                      }
+                    }
+                  });
+                },
+              )),
+            ],
           ),
-          actions: <Widget>[
+          actions: [
             TextButton(
               child: Text('Cancel'),
               onPressed: () {
@@ -319,6 +340,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   await _userService.enrollInCourses(
                       _user!.uid, _selectedCourses);
                   Navigator.of(context).pop();
+                  _fetchEnrolledCourses();
                 } catch (error) {
                   print('Error enrolling in courses: $error');
                 }
