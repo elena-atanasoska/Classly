@@ -4,7 +4,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-void main() async{
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
@@ -13,10 +13,6 @@ void main() async{
 }
 
 class MyApp extends StatelessWidget {
-  // final CalendarEventService firestoreService;
-
-  // MyApp({required this.firestoreService});
-
   final MaterialColor customColor = const MaterialColor(0xFF2196F3, {
     50: Color(0xFFE3F2FD),
     100: Color(0xFFBBDEFB),
@@ -41,7 +37,7 @@ class MyApp extends StatelessWidget {
           brightness: Brightness.light,
         ),
         textTheme: TextTheme(
-          displayLarge: const TextStyle(
+          displayLarge: GoogleFonts.poppins(
             fontSize: 50,
             fontWeight: FontWeight.bold,
           ),
@@ -50,6 +46,51 @@ class MyApp extends StatelessWidget {
           ),
           bodyMedium: GoogleFonts.poppins(),
           displaySmall: GoogleFonts.poppins(),
+        ),
+        elevatedButtonTheme: ElevatedButtonThemeData(
+          style: ElevatedButton.styleFrom(
+            textStyle: GoogleFonts.poppins(),
+          ),
+        ),
+        textButtonTheme: TextButtonThemeData(
+          style: TextButton.styleFrom(
+            textStyle: GoogleFonts.poppins(),
+          ),
+        ),
+        outlinedButtonTheme: OutlinedButtonThemeData(
+          style: OutlinedButton.styleFrom(
+            textStyle: GoogleFonts.poppins(),
+          ),
+        ),
+        dialogTheme: DialogTheme(
+          titleTextStyle: GoogleFonts.poppins(
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+          ),
+          contentTextStyle: GoogleFonts.poppins(),
+        ),
+        inputDecorationTheme: InputDecorationTheme(
+          labelStyle: GoogleFonts.poppins(),
+          hintStyle: GoogleFonts.poppins(),
+          floatingLabelStyle: GoogleFonts.poppins(),
+          errorStyle: GoogleFonts.poppins(),
+          border: OutlineInputBorder(
+            borderSide: BorderSide(color: customColor),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderSide: BorderSide(color: customColor),
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderSide: BorderSide(color: customColor),
+          ),
+          disabledBorder: OutlineInputBorder(
+            borderSide: BorderSide(color: customColor),
+          ),
+        ),
+        dropdownMenuTheme: DropdownMenuThemeData(
+          textStyle: GoogleFonts.poppins(
+            fontSize: 16,
+          ),
         ),
       ),
       home: const Splashscreen(),

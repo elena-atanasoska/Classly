@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:syncfusion_flutter_calendar/calendar.dart';
 
 import '../../application/services/CourseService.dart';
@@ -29,7 +30,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
 
   Future<void> _loadEventsForCurrentDay(DateTime date) async {
     List<CalendarEvent> eventsForCurrentDay =
-        await eventService.getEventsForDay(date);
+    await eventService.getEventsForDay(date);
 
     setState(() {
       appointments = eventsForCurrentDay;
@@ -39,40 +40,48 @@ class _CalendarScreenState extends State<CalendarScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      home: Scaffold(
-        appBar: AppBar(
-          title: const Text('Calendar'),
-          actions: [
-            WeatherWidget(),
-          ],
-        ),
-        body: Stack(
-          children: [
-            SfCalendar(
-              view: CalendarView.day,
-              dataSource: events,
-              onTap: (CalendarTapDetails details) {
-                if (details.appointments != null &&
-                    details.appointments!.isNotEmpty) {
-                  _showEventDetailsDialog(details.appointments![0]);
-                } else if (details.targetElement ==
-                    CalendarElement.calendarCell) {
-                  _showAddEventDialog(details.date!);
-                }
-              },
-              onViewChanged: (ViewChangedDetails details) {
-                _loadEventsForCurrentDay(details.visibleDates[0]);
-              },
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Calendar'),
+        actions: [
+          WeatherWidget(),
+        ],
+      ),
+      body: Stack(
+        children: [
+          SfCalendar(
+            view: CalendarView.day,
+            dataSource: events,
+            appointmentTextStyle: GoogleFonts.poppins(
+              color: Colors.white
             ),
-          ],
-        ),
-        floatingActionButton: FloatingActionButton(
-          onPressed: () {
-            _showAddEventDialog(DateTime.now());
-          },
-          child: const Icon(Icons.add),
-        ),
+            headerStyle: CalendarHeaderStyle(
+              textStyle: GoogleFonts.poppins()
+            ),
+            viewHeaderStyle: ViewHeaderStyle(
+              dateTextStyle: GoogleFonts.poppins(),
+              dayTextStyle: GoogleFonts.poppins()
+            ),
+            onTap: (CalendarTapDetails details) {
+              if (details.appointments != null &&
+                  details.appointments!.isNotEmpty) {
+                _showEventDetailsDialog(details.appointments![0]);
+              } else if (details.targetElement ==
+                  CalendarElement.calendarCell) {
+                _showAddEventDialog(details.date!);
+              }
+            },
+            onViewChanged: (ViewChangedDetails details) {
+              _loadEventsForCurrentDay(details.visibleDates[0]);
+            },
+          ),
+        ],
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          _showAddEventDialog(DateTime.now());
+        },
+        child: const Icon(Icons.add),
       ),
     );
   }
@@ -98,16 +107,6 @@ class _CalendarScreenState extends State<CalendarScreen> {
       ),
     );
   }
-
-// Future<void> _showEventDetailsDialog(CalendarEvent event) async {
-//   Navigator.push(
-//     context,
-//     MaterialPageRoute(
-//       builder: (context) => EventScreen(
-//           event: event, onDelete: _deleteEvent, onEdit: _editEvent),
-//     ),
-//   );
-//
 }
 
 class MeetingDataSource extends CalendarDataSource {

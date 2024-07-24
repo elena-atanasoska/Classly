@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 import '../../application/services/NotificationsService.dart';
 import '../../domain/models/AppNotification.dart';
@@ -69,9 +70,9 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                 ListTile(
                   title: Text(
                     formatDate(date),
-                    style: TextStyle(
+                    style: GoogleFonts.poppins(
                       fontSize: 18,
-                      fontWeight: FontWeight.bold,
+                      fontWeight: FontWeight.w400,
                       color: Colors.blue,
                     ),
                   ),
@@ -86,8 +87,8 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                         Icons.notifications_active,
                         color: Colors.white,
                       ),
-                      title: Text(notification.title, style: TextStyle(color: Colors.white)),
-                      subtitle: Text(notification.body, style: TextStyle(color: Colors.white)),
+                      title: Text(notification.title, style: GoogleFonts.poppins(color: Colors.white)),
+                      subtitle: Text(notification.body, style: GoogleFonts.poppins(color: Colors.white)),
                     ),
                   );
                 }),
