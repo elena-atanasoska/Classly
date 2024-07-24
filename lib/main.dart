@@ -1,3 +1,4 @@
+import 'package:classly/presentation/screens/splashscreen.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
@@ -7,24 +8,22 @@ void main() async{
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-  runApp(const MyApp());
+  runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  // final CalendarEventService firestoreService;
+
+  // MyApp({required this.firestoreService});
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      title: 'Hello App',
-      home: Scaffold(
-        body: Center(
-          child: Text(
-            'Hello',
-            style: TextStyle(fontSize: 48),
-          ),
-        ),
+    return MaterialApp(
+      title: 'Flutter Demo',
+      theme: ThemeData(
+        primarySwatch: Colors.blue,
       ),
+      home: Splashscreen(),
     );
   }
 }
