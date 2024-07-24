@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:syncfusion_flutter_calendar/calendar.dart';
 
+import '../../application/services/CourseService.dart';
+import '../../application/services/EventService.dart';
+import '../../application/services/NotificationsService.dart';
 import '../../domain/models/CalendarEvent.dart';
-import '../../service/CourseService.dart';
-import '../../service/EventService.dart';
-import '../../service/NotificationsService.dart';
 import '../widgets/add_event_dialog.dart';
 import '../widgets/weather_widget.dart';
 import 'event_screen.dart';
@@ -83,7 +83,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
       builder: (context) => AddEventDialog(
         selectedDate: selectedDate,
         onAddEvent: (CalendarEvent event) async {
-          await eventService.saveCalendarEvent(event);
+          await eventService.saveEvent(event);
           _loadEventsForCurrentDay(selectedDate);
         },
       ),

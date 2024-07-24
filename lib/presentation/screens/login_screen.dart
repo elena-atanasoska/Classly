@@ -1,8 +1,8 @@
 import 'package:classly/presentation/screens/register_screen.dart';
-import 'package:classly/service/AuthService.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
+import '../../application/services/AuthService.dart';
 import 'bottom_navigation.dart';
 
 

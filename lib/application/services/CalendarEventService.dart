@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-import '../domain/models/CalendarEvent.dart';
+import '../../domain/models/CalendarEvent.dart';
 
 
 class CalendarEventService {

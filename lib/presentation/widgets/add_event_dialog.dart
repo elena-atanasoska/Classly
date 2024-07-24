@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 
+import '../../application/services/CourseService.dart';
 import '../../domain/models/CalendarEvent.dart';
 import '../../domain/models/Course.dart';
 import '../../domain/models/Professor.dart';
 import '../../domain/models/Room.dart';
-import '../../service/CourseService.dart';
 
 class AddEventDialog extends StatefulWidget {
   final DateTime selectedDate;
