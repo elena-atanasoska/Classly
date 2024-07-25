@@ -21,9 +21,35 @@ class UserRepository {
   }
 
   Future<List<Course>> getEnrolledCourses(String uid) async {
-    QuerySnapshot querySnapshot =
-    await _firestore.collection('custom_users/$uid/enrolledCourses').get();
-    return querySnapshot.docs.map((doc) => Course.fromDocument(doc)).toList();
+    try {
+      QuerySnapshot userQuerySnapshot = await _firestore
+          .collection('custom_users')
+          .where('uid', isEqualTo: uid)
+          .limit(1)
+          .get();
+
+      if (userQuerySnapshot.docs.isEmpty) {
+        return [];
+      }
+
+      DocumentSnapshot userDoc = userQuerySnapshot.docs.first;
+
+      List<String> enrolledCourseIds = List<String>.from(userDoc.get('enrolledCourses') ?? []);
+
+      List<Course> enrolledCourses = [];
+
+      for (String courseId in enrolledCourseIds) {
+        DocumentSnapshot courseDoc = await _firestore.collection('courses').doc(courseId).get();
+        if (courseDoc.exists) {
+          enrolledCourses.add(Course.fromDocument(courseDoc));
+        }
+      }
+
+      return enrolledCourses;
+    } catch (e) {
+      print('Error fetching enrolled courses: $e');
+      return [];
+    }
   }
 
   Future<List<Course>> getAvailableCourses() async {
@@ -85,5 +111,19 @@ class UserRepository {
       print('Error updating user role: $e');
       throw Exception('Failed to update user role');
     }
+  }
+
+  Future<void> enrollInCourse(String userId, Course course) async {
+    DocumentReference userRef = _firestore.collection('custom_users').doc(userId);
+    await userRef.update({
+      'enrolledCourses': FieldValue.arrayUnion([{'courseId': course.courseId}]),
+    });
+  }
+
+  Future<void> unenrollFromCourse(String userId, Course course) async {
+    DocumentReference userRef = _firestore.collection('custom_users').doc(userId);
+    await userRef.update({
+      'enrolledCourses': FieldValue.arrayRemove([{'courseId': course.courseId}]),
+    });
   }
 }

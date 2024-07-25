@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:classly/presentation/screens/user_management_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
@@ -111,35 +112,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   void _showUserManagement() {
-    showModalBottomSheet(
-      context: context,
-      builder: (BuildContext context) {
-        return ListView.builder(
-          itemCount: _allUsers.length,
-          itemBuilder: (context, index) {
-            CustomUser user = _allUsers[index];
-            return ListTile(
-              title: Text(user.getFullName() ?? 'No name available',
-              style: GoogleFonts.poppins(),),
-              subtitle: Text("${user.email}, ${user.role.name}" ?? 'No email available'),
-              trailing: DropdownButton<String>(
-                onChanged: (String? newRole) {
-                  if (newRole != null) {
-                    _updateUserRole(user.uid, newRole);
-                  }
-                },
-                items: <String>['Student', 'Professor']
-                    .map<DropdownMenuItem<String>>((String value) {
-                  return DropdownMenuItem<String>(
-                    value: value,
-                    child: Text(value),
-                  );
-                }).toList(),
-              ),
-            );
-          },
-        );
-      },
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => UserManagementScreen(
+          users: _allUsers,
+          userService: _userService,
+        ),
+      ),
     );
   }
 

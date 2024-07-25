@@ -56,6 +56,20 @@ class UserService {
     }
   }
 
+  Future<void> disenrollFromCourses(String userId, List<Course> courses) async {
+    try {
+      List<Map<String, String>> courseIds = courses
+          .map((course) => {'courseId': course.courseId})
+          .toList();
+
+      await userRepository.updateCourses(userId, [], courseIds);
+      print('User $userId enrolled in courses: $courseIds');
+    } catch (error) {
+      print('Error enrolling in courses: $error');
+      throw Exception('Error enrolling in courses: $error');
+    }
+  }
+
   Future<List<CustomUser>> getAllUsers() async {
     try {
       return await userRepository.getAllUsers();
@@ -94,5 +108,13 @@ class UserService {
       print('Error adding user to Firestore: $e');
       throw Exception('Failed to add user');
     }
+  }
+
+  Future<void> enrollInCourse(String userId, Course course) async {
+    await userRepository.enrollInCourse(userId, course);
+  }
+
+  Future<void> unenrollFromCourse(String userId, Course course) async {
+    await userRepository.unenrollFromCourse(userId, course);
   }
 }
