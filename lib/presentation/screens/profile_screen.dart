@@ -1,7 +1,6 @@
 import 'dart:io';
 import 'dart:typed_data';
 
-import 'package:classly/domain/enum/UserRole.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
@@ -50,6 +49,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       try {
         CustomUser? userFromService = await _userService.getUser(_user!.uid);
         if (userFromService != null) {
+          _user = userFromService;
           String? profileImageUrl = userFromService.photoURL;
 
           if (profileImageUrl != null) {
@@ -207,7 +207,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               style: TextStyle(fontSize: 20, color: Colors.black),
             )),
             SizedBox(height: 16),
-            if (_user?.isProfessor==true) ...[
+            if (_user?.isProfessor == true) ...[
               ElevatedButton(
                 onPressed: _showUserManagement,
                 child: Text('Manage Users'),
