@@ -20,7 +20,7 @@ class ProfileScreen extends StatefulWidget {
 
 class _ProfileScreenState extends State<ProfileScreen> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
-  final AuthService _firebaseService = AuthService();
+  final AuthService _authService = AuthService();
   final UserService _userService = UserService();
   final ImagePicker _imagePicker = ImagePicker();
 
@@ -42,7 +42,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   void _updateUser() async {
-    User? currentUser = _auth.currentUser;
+    User? currentUser = await _authService.getCurrentUser();
     if (currentUser != null) {
       _user = CustomUser.fromFirebaseUser(currentUser);
 
@@ -102,7 +102,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   void _logout() async {
-    await FirebaseAuth.instance.signOut();
+    await _authService.signOut();
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(builder: (context) => LoginScreen()),
