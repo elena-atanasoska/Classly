@@ -5,10 +5,6 @@ import 'bottom_navigation.dart';
 import 'register_screen.dart';
 
 class LoginScreen extends StatefulWidget {
-  final AuthService firebaseService;
-
-  LoginScreen(this.firebaseService);
-
   @override
   _LoginScreenState createState() => _LoginScreenState();
 }
@@ -17,6 +13,7 @@ class _LoginScreenState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+  final AuthService authService = AuthService();
 
   @override
   Widget build(BuildContext context) {
@@ -72,7 +69,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 onPressed: () {
                   Navigator.pushReplacement(
                     context,
-                    MaterialPageRoute(builder: (context) => RegistrationScreen(widget.firebaseService)),
+                    MaterialPageRoute(builder: (context) => RegistrationScreen()),
                   );
                 },
                 child: Text('Don\'t have an account? Register'),
@@ -90,10 +87,7 @@ class _LoginScreenState extends State<LoginScreen> {
       BuildContext context,
       ) async {
     try {
-      await FirebaseAuth.instance.signInWithEmailAndPassword(
-        email: email,
-        password: password,
-      );
+      await authService.login(email, password);
 
       Navigator.pushReplacement(
         context,

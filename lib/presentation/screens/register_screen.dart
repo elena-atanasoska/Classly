@@ -1,16 +1,11 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:classly/application/services/UserService.dart';
 import 'package:flutter/material.dart';
 import '../../application/services/AuthService.dart';
-import '../../domain/enum/UserRole.dart';
+import '../../domain/models/CustomUser.dart';
 import 'bottom_navigation.dart';
 import 'login_screen.dart';
 
 class RegistrationScreen extends StatefulWidget {
-  final AuthService firebaseService;
-
-  RegistrationScreen(this.firebaseService);
-
   @override
   _RegistrationScreenState createState() => _RegistrationScreenState();
 }
@@ -21,8 +16,9 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
   TextEditingController _emailController = TextEditingController();
   TextEditingController _passwordController = TextEditingController();
 
-  final AuthService _firebaseService = AuthService();
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+
+  final AuthService authService = AuthService();
+  final UserService userService = UserService();
 
   @override
   Widget build(BuildContext context) {
@@ -73,7 +69,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
               onPressed: () {
                 Navigator.pushReplacement(
                   context,
-                  MaterialPageRoute(builder: (context) => LoginScreen(_firebaseService)),
+                  MaterialPageRoute(builder: (context) => LoginScreen()),
                 );
               },
               child: Text('Already have an account? Login'),
@@ -92,22 +88,8 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
       BuildContext context,
       ) async {
     try {
-      UserCredential authResult = await FirebaseAuth.instance.createUserWithEmailAndPassword(
-        email: email,
-        password: password,
-      );
-
-      User? user = authResult.user;
-
-      await user?.updateDisplayName('$firstName $lastName');
-
-      await _firestore.collection('custom_users').doc(user?.uid).set({
-        'uid': user?.uid,
-        'email': email,
-        'firstName': firstName,
-        'lastName': lastName,
-        'role': UserRole.STUDENT.toString(), // Save role as STUDENT
-      });
+      CustomUser user = await authService.register(email, password, firstName, lastName) as CustomUser;
+      await userService.addUserToFirestore(user.uid, email, firstName, lastName);
 
       Navigator.pushReplacement(
         context,

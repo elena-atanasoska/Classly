@@ -5,6 +5,10 @@ import '../../domain/models/CustomUser.dart';
 class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
+  Future<User?> getCurrentUser() async {
+    return _auth.currentUser;
+  }
+
   CustomUser? _userFromFirebaseUser(User? user) {
     return user != null ? CustomUser.fromFirebaseUser(user) : null;
   }

@@ -32,7 +32,7 @@ class _SplashscreenState extends State<Splashscreen> {
         } else {
           Navigator.pushReplacement(
             context,
-            MaterialPageRoute(builder: (context) => LoginScreen(_firebaseService)),
+            MaterialPageRoute(builder: (context) => LoginScreen()),
           );
         }
       },

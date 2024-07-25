@@ -105,7 +105,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     await FirebaseAuth.instance.signOut();
     Navigator.pushReplacement(
       context,
-      MaterialPageRoute(builder: (context) => LoginScreen(_firebaseService)),
+      MaterialPageRoute(builder: (context) => LoginScreen()),
     );
   }
 
