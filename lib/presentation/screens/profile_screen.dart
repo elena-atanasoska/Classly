@@ -4,6 +4,7 @@ import 'dart:typed_data';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:http/http.dart' as http;
 
@@ -24,7 +25,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   final UserService _userService = UserService();
   final ImagePicker _imagePicker = ImagePicker();
 
-  late CustomUser? _user;
+  CustomUser? _user;
   List<Course> _enrolledCourses = [];
   List<Course> _availableCourses = [];
   List<Course> _selectedCourses = [];
@@ -118,16 +119,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
           itemBuilder: (context, index) {
             CustomUser user = _allUsers[index];
             return ListTile(
-              title: Text(user.getFullName() ?? 'No name available'),
-              subtitle: Text(user.email ?? 'No email available'),
+              title: Text(user.getFullName() ?? 'No name available',
+              style: GoogleFonts.poppins(),),
+              subtitle: Text("${user.email}, ${user.role.name}" ?? 'No email available'),
               trailing: DropdownButton<String>(
-                value: user.role.name,
                 onChanged: (String? newRole) {
                   if (newRole != null) {
                     _updateUserRole(user.uid, newRole);
                   }
                 },
-                items: <String>['Student', 'Professor', 'Admin']
+                items: <String>['Student', 'Professor']
                     .map<DropdownMenuItem<String>>((String value) {
                   return DropdownMenuItem<String>(
                     value: value,

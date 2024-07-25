@@ -79,7 +79,7 @@ class UserRepository {
   Future<void> updateUserRole(String uid, UserRole newRole) async {
     try {
       await _firestore.collection('custom_users').doc(uid).update({
-        'role': newRole.index,
+        'role': newRole.toString(),
       });
     } catch (e) {
       print('Error updating user role: $e');
