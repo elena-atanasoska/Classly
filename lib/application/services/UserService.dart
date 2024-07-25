@@ -33,14 +33,6 @@ class UserService {
     }
   }
 
-  Future<List<Course>> getAvailableCourses() async {
-    try {
-      return await userRepository.getAvailableCourses();
-    } catch (e) {
-      print('Error fetching available courses: $e');
-      return [];
-    }
-  }
 
   Future<void> enrollInCourses(String userId, List<Course> courses) async {
     try {
@@ -114,7 +106,7 @@ class UserService {
     await userRepository.enrollInCourse(userId, course);
   }
 
-  Future<void> unenrollFromCourse(String userId, Course course) async {
-    await userRepository.unenrollFromCourse(userId, course);
+  Future<void> disenrollFromCourse(String userId, Course course) async {
+    await userRepository.disenrollFromCourse(userId, course);
   }
 }

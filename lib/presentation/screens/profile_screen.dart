@@ -86,7 +86,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   void _fetchAvailableCourses() async {
     try {
-      List<Course> courses = await _userService.getAvailableCourses();
+      List<Course> courses = await _courseService.getAvailableCourses();
       setState(() {
         _availableCourses = courses;
       });

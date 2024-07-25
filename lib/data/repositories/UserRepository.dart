@@ -52,10 +52,6 @@ class UserRepository {
     }
   }
 
-  Future<List<Course>> getAvailableCourses() async {
-    QuerySnapshot querySnapshot = await _firestore.collection('courses').get();
-    return querySnapshot.docs.map((doc) => Course.fromDocument(doc)).toList();
-  }
 
   Future<void> updateCourses(String uid, List<Map<String, String>> coursesToEnroll,
       List<Map<String, String>> coursesToDisenroll) async {
@@ -116,14 +112,14 @@ class UserRepository {
   Future<void> enrollInCourse(String userId, Course course) async {
     DocumentReference userRef = _firestore.collection('custom_users').doc(userId);
     await userRef.update({
-      'enrolledCourses': FieldValue.arrayUnion([{'courseId': course.courseId}]),
+      'enrolledCourses': FieldValue.arrayUnion([course.courseId]),
     });
   }
 
-  Future<void> unenrollFromCourse(String userId, Course course) async {
+  Future<void> disenrollFromCourse(String userId, Course course) async {
     DocumentReference userRef = _firestore.collection('custom_users').doc(userId);
     await userRef.update({
-      'enrolledCourses': FieldValue.arrayRemove([{'courseId': course.courseId}]),
+      'enrolledCourses': FieldValue.arrayRemove([course.courseId]),
     });
   }
 }

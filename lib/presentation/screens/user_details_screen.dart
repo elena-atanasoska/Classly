@@ -1,3 +1,4 @@
+import 'package:classly/application/services/CourseService.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../domain/models/CustomUser.dart';
@@ -15,6 +16,7 @@ class UserDetailsScreen extends StatefulWidget {
 }
 
 class _UserDetailsScreenState extends State<UserDetailsScreen> {
+  final CourseService courseService = CourseService();
   List<Course> enrolledCourses = [];
   List<Course> availableCourses = [];
   List<Course> selectedCourses = [];
@@ -29,7 +31,7 @@ class _UserDetailsScreenState extends State<UserDetailsScreen> {
   Future<void> _loadUserDetails() async {
     try {
       List<Course> courses = await widget.userService.getEnrolledCourses(widget.user.uid);
-      List<Course> allCourses = await widget.userService.getAvailableCourses();
+      List<Course> allCourses = await courseService.getAvailableCourses();
       setState(() {
         enrolledCourses = courses;
         availableCourses = allCourses;
@@ -68,20 +70,38 @@ class _UserDetailsScreenState extends State<UserDetailsScreen> {
   }
 
   void _saveCourseChanges() async {
-    // try {
-    //   List<Course> coursesToEnroll = selectedCourses.where((course) => !enrolledCourses.contains(course)).toList();
-    //   List<Course> coursesToDisenroll = selectedCourses.where((course) => enrolledCourses.contains(course)).toList();
-    //
-    //   await widget.userService.enrollInCourses(
-    //     widget.user.uid,
-    //     coursesToEnroll.map((course) => {'courseId': course.courseId}).toList(),
-    //     coursesToDisenroll.map((course) => {'courseId': course.courseId}).toList(),
-    //   );
-    //   ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Courses updated successfully.')));
-    //   _loadUserDetails();
-    // } catch (error) {
-    //   print('Error updating courses: $error');
-    // }
+    try {
+      List<Course> coursesToEnroll = selectedCourses
+          .where((course) => !enrolledCourses.contains(course))
+          .toList();
+
+      List<Course> coursesToDisenroll = selectedCourses
+          .where((course) => enrolledCourses.contains(course))
+          .toList();
+
+      for (var course in coursesToEnroll) {
+        await widget.userService.enrollInCourse(widget.user.uid, course);
+      }
+
+      for (var course in coursesToDisenroll) {
+        await widget.userService.disenrollFromCourse(widget.user.uid, course);
+      }
+
+      await _loadUserDetails();
+
+      setState(() {
+        selectedCourses.clear();
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Course changes saved successfully.')),
+      );
+    } catch (error) {
+      print('Error saving course changes: $error');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to save course changes.')),
+      );
+    }
   }
 
   @override

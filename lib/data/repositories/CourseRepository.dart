@@ -23,9 +23,13 @@ class CourseRepository {
 
   Future<void> addCourse(String courseName, String courseFullName) async {
     try {
-      await _firestore.collection('courses').add({
+      DocumentReference docRef = await _firestore.collection('courses').add({
         'courseName': courseName,
         'courseFullName': courseFullName,
+      });
+
+      await docRef.update({
+        'courseId': docRef.id,
       });
     } catch (error) {
       print('Error adding course to repository: $error');
