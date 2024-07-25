@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:classly/application/services/CourseService.dart';
 import 'package:classly/presentation/screens/user_management_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
@@ -13,6 +14,7 @@ import '../../application/services/AuthService.dart';
 import '../../application/services/UserService.dart';
 import '../../domain/models/Course.dart';
 import '../../domain/models/CustomUser.dart';
+import 'course_management_screen.dart';
 import 'login_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
@@ -24,6 +26,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final AuthService _authService = AuthService();
   final UserService _userService = UserService();
+  final CourseService _courseService = CourseService();
   final ImagePicker _imagePicker = ImagePicker();
 
   CustomUser? _user;
@@ -123,6 +126,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
+  void _showCourseManagement() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => CourseManagementScreen(courseService: _courseService),
+      ),
+    );
+  }
+
   void _updateUserRole(String userId, String newRole) async {
     try {
       await _userService.updateUserRole(userId, newRole);
@@ -178,6 +190,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               style: TextStyle(fontSize: 20),
             ),
             SizedBox(height: 16),
+            if (_user?.isProfessor != true) ...[
             Text(
               'Enrolled Courses:',
               style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.blue),
@@ -186,24 +199,29 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ..._enrolledCourses.map((course) => Text(
               course.courseFullName,
               style: TextStyle(fontSize: 20, color: Colors.black),
-            )),
+            )),] else
             SizedBox(height: 16),
             if (_user?.isProfessor == true) ...[
               ElevatedButton(
                 onPressed: _showUserManagement,
                 child: Text('Manage Users'),
               ),
+              SizedBox(height: 15.0),
+              ElevatedButton(
+                onPressed: _showCourseManagement,
+                child: Text('Manage Courses'),
+              ),
             ],
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          _showEnrollmentDialog(context);
-        },
-        tooltip: 'Enroll in Course',
-        child: Icon(Icons.add),
-      ),
+      // floatingActionButton: FloatingActionButton(
+      //   onPressed: () {
+      //     _showEnrollmentDialog(context);
+      //   },
+      //   tooltip: 'Enroll in Course',
+      //   child: Icon(Icons.add),
+      // ),
     );
   }
 

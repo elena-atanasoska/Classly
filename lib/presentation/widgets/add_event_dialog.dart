@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 import '../../application/services/CourseService.dart';
 import '../../domain/models/CalendarEvent.dart';
@@ -60,7 +61,7 @@ class _AddEventDialogState extends State<AddEventDialog> {
           List<Course> courses = snapshot.data!;
 
           return AlertDialog(
-            title: Text('Add Event'),
+            title: Text('Add Event', style: TextStyle(color: Colors.blue)),
             content: SingleChildScrollView(
               child: IntrinsicHeight(
                 child: Column(
@@ -71,33 +72,34 @@ class _AddEventDialogState extends State<AddEventDialog> {
                         labelText: 'Enter event title',
                       ),
                     ),
-                    SizedBox(height: 10.0),
+                    SizedBox(height: 15.0),
                     TextField(
                       controller: dateController,
                       decoration:
                           InputDecoration(labelText: 'Date (YYYY-MM-DD)'),
                       enabled: false, // Disable date editing
                     ),
-                    SizedBox(height: 10.0),
+                    SizedBox(height: 15.0),
                     TextField(
                       controller: timeController,
                       decoration: InputDecoration(labelText: 'Time (HH:MM)'),
                       enabled: false, // Disable time editing
                     ),
+                    SizedBox(height: 15.0),
                     TextField(
                       controller: durationController,
                       decoration:
                           InputDecoration(labelText: 'Duration (hours)'),
                     ),
-                    SizedBox(height: 10.0),
+                    SizedBox(height: 15.0),
                     DropdownButtonFormField<Course>(
-                      hint: Text('Select a Course'),
+                      hint: Text('Select a Course', style: GoogleFonts.poppins()),
                       value: selectedCourse,
                       items: courses
                           .map<DropdownMenuItem<Course>>((Course course) {
                         return DropdownMenuItem<Course>(
                           value: course,
-                          child: Text(course.courseName),
+                          child: Text(course.courseName, style: GoogleFonts.poppins(),),
                         );
                       }).toList(),
                       onChanged: (Course? newValue) {

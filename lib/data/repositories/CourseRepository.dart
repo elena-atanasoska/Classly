@@ -20,4 +20,16 @@ class CourseRepository {
       throw error;
     }
   }
+
+  Future<void> addCourse(String courseName, String courseFullName) async {
+    try {
+      await _firestore.collection('courses').add({
+        'courseName': courseName,
+        'courseFullName': courseFullName,
+      });
+    } catch (error) {
+      print('Error adding course to repository: $error');
+      throw Exception('Failed to add course to repository');
+    }
+  }
 }
