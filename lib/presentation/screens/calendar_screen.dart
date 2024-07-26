@@ -6,7 +6,7 @@ import '../../application/services/CourseService.dart';
 import '../../application/services/EventService.dart';
 import '../../application/services/NotificationsService.dart';
 import '../../domain/models/CalendarEvent.dart';
-import '../widgets/add_event_dialog.dart';
+import '../widgets/add_event_form.dart';
 import '../widgets/weather_widget.dart';
 import 'event_screen.dart';
 
@@ -89,7 +89,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
   Future<void> _showAddEventDialog(DateTime selectedDate) async {
     await showDialog(
       context: context,
-      builder: (context) => AddEventDialog(
+      builder: (context) => AddEventForm(
         selectedDate: selectedDate,
         onAddEvent: (CalendarEvent event) async {
           await eventService.saveEvent(event);
