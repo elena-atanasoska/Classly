@@ -53,15 +53,20 @@ class _CalendarScreenState extends State<CalendarScreen> {
             view: CalendarView.day,
             dataSource: events,
             appointmentTextStyle: GoogleFonts.poppins(
-              color: Colors.white
+                color: Colors.white
             ),
             headerStyle: CalendarHeaderStyle(
-              textStyle: GoogleFonts.poppins()
+                textStyle: GoogleFonts.poppins()
             ),
             viewHeaderStyle: ViewHeaderStyle(
-              dateTextStyle: GoogleFonts.poppins(),
-              dayTextStyle: GoogleFonts.poppins()
+                dateTextStyle: GoogleFonts.poppins(),
+                dayTextStyle: GoogleFonts.poppins()
             ),
+            allowedViews: [
+              CalendarView.day,
+              CalendarView.week,
+              CalendarView.month,
+            ],
             onTap: (CalendarTapDetails details) {
               if (details.appointments != null &&
                   details.appointments!.isNotEmpty) {
