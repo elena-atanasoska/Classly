@@ -16,7 +16,7 @@ void main() async {
 }
 
 class MyApp extends StatelessWidget {
-  final MaterialColor customColor = const MaterialColor(0xFF2196F3, {
+  final MaterialColor customColor = const MaterialColor(0xFF0D47A1, {
     50: Color(0xFFE3F2FD),
     100: Color(0xFFBBDEFB),
     200: Color(0xFF90CAF9),
@@ -38,6 +38,12 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(
           seedColor: customColor,
           brightness: Brightness.light,
+        ),
+        appBarTheme: AppBarTheme(
+          titleTextStyle: GoogleFonts.poppins(
+            color: Color(0xFF0D47A1),
+            fontSize: 25
+          )
         ),
         textTheme: TextTheme(
           displayLarge: GoogleFonts.poppins(

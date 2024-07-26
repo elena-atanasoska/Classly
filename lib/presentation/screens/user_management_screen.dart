@@ -72,7 +72,7 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
                 bool isSelected = filterRole == role;
                 return ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: isSelected ? Colors.blue : Colors.grey,
+                    backgroundColor: isSelected ? Color(0xFF0D47A1) : Colors.grey,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(20.0), // Round buttons
                     ),

@@ -172,7 +172,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             SizedBox(height: 30),
             Text(
               'Name:',
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.blue),
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Color(0xFF0D47A1)),
             ),
             SizedBox(height: 8),
             Text(
@@ -182,7 +182,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             SizedBox(height: 16),
             const Text(
               'Email:',
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.blue),
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Color(0xFF0D47A1)),
             ),
             SizedBox(height: 8),
             Text(
@@ -193,7 +193,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             if (_user?.isProfessor != true) ...[
             Text(
               'Enrolled Courses:',
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.blue),
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Color(0xFF0D47A1)),
             ),
             SizedBox(height: 8),
             ..._enrolledCourses.map((course) => Text(

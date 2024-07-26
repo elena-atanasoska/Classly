@@ -129,7 +129,7 @@ class _AddEventFormState extends State<AddEventForm> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Add Event', style: TextStyle(color: Colors.blue)),
+        title: Text('Add Event', style: TextStyle(color: Color(0xFF0D47A1))),
       ),
       body: FutureBuilder<List<Course>>(
         future: _fetchAvailableCourses(),

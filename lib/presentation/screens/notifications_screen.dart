@@ -45,7 +45,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
             Icon(
               Icons.notifications,
               size: 100,
-              color: Colors.blue,
+              color: Color(0xFF0D47A1),
             ),
             SizedBox(height: 20),
             Text(
@@ -73,14 +73,14 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                     style: GoogleFonts.poppins(
                       fontSize: 18,
                       fontWeight: FontWeight.w400,
-                      color: Colors.blue,
+                      color: Color(0xFF0D47A1),
                     ),
                   ),
                 ),
                 ...dateNotifications.map((notification) {
                   return Card(
                     elevation: 2.0,
-                    color: Colors.blue,
+                    color: Color(0xFF0D47A1),
                     margin: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     child: ListTile(
                       leading: Icon(

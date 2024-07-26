@@ -20,7 +20,8 @@ class _UserDetailsScreenState extends State<UserDetailsScreen> {
   List<Course> enrolledCourses = [];
   List<Course> availableCourses = [];
   List<Course> selectedCourses = [];
-  String selectedRole = '';
+  String? currentRole;
+  String? selectedRole;
 
   @override
   void initState() {
@@ -32,10 +33,11 @@ class _UserDetailsScreenState extends State<UserDetailsScreen> {
     try {
       List<Course> courses = await widget.userService.getEnrolledCourses(widget.user.uid);
       List<Course> allCourses = await courseService.getAvailableCourses();
+      String? role = (await widget.userService.getUser(widget.user.uid))?.role.name;
       setState(() {
         enrolledCourses = courses;
         availableCourses = allCourses;
-        selectedRole = widget.user.role.name;
+        currentRole = role!;
       });
     } catch (error) {
       print('Error loading user details: $error');
@@ -45,7 +47,11 @@ class _UserDetailsScreenState extends State<UserDetailsScreen> {
   void _updateUserRole(String newRole) async {
     try {
       await widget.userService.updateUserRole(widget.user.uid, newRole);
+      setState(() {
+        currentRole = newRole.toUpperCase();
+      });
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Role updated successfully.')));
+      await _loadUserDetails();
     } catch (error) {
       print('Error updating user role: $error');
     }
@@ -120,28 +126,32 @@ class _UserDetailsScreenState extends State<UserDetailsScreen> {
               style: GoogleFonts.poppins(fontSize: 24, fontWeight: FontWeight.bold),
             ),
             SizedBox(height: 8),
-            Text(widget.user.email ?? 'No email available'),
+            Text('${widget.user.email}, $currentRole'),
             SizedBox(height: 16),
-            Text(
-              'Update User Role',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-            DropdownButton<String>(
-              onChanged: (String? newValue) {
-                if (newValue != null) {
-                  _updateUserRole(newValue);
-                  setState(() {
-                    selectedRole = newValue;
-                  });
-                }
-              },
-              items: <String>['Student', 'Professor']
-                  .map<DropdownMenuItem<String>>((String value) {
-                return DropdownMenuItem<String>(
-                  value: value,
-                  child: Text(value, style: GoogleFonts.poppins(),),
-                );
-              }).toList(),
+            Row(
+              children: [
+                Text(
+                  'Update User Role: ',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+                DropdownButton<String>(
+                  onChanged: (String? newValue) {
+                    if (newValue != null) {
+                      _updateUserRole(newValue);
+                      setState(() {
+                        selectedRole = newValue;
+                      });
+                    }
+                  },
+                  items: <String>['Student', 'Professor']
+                      .map<DropdownMenuItem<String>>((String value) {
+                    return DropdownMenuItem<String>(
+                      value: value,
+                      child: Text(value, style: GoogleFonts.poppins()),
+                    );
+                  }).toList(),
+                ),
+              ],
             ),
             SizedBox(height: 16),
             Text(
@@ -155,7 +165,7 @@ class _UserDetailsScreenState extends State<UserDetailsScreen> {
                   Course course = availableCourses[index];
                   bool isSelected = selectedCourses.contains(course);
                   return CheckboxListTile(
-                    title: Text(course.courseFullName, style: GoogleFonts.poppins(),),
+                    title: Text(course.courseFullName, style: GoogleFonts.poppins()),
                     value: isSelected,
                     onChanged: (_) => _toggleCourseEnrollment(course),
                   );

@@ -1,5 +1,6 @@
 import 'package:classly/application/services/CourseService.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 import '../../domain/models/Course.dart';
 import 'course_details_screen.dart';
@@ -61,7 +62,7 @@ class _CourseManagementScreenState extends State<CourseManagementScreen> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('Add New Course', style: TextStyle(color: Colors.blue)),
+          title: const Text('Add New Course', style: TextStyle(color: Color(0xFF0D47A1))),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -137,7 +138,7 @@ class _CourseManagementScreenState extends State<CourseManagementScreen> {
           ),
           ElevatedButton(
             onPressed: _showAddCourseDialog,
-            child: const Text('Add New Course', style: TextStyle(color: Colors.blue)),
+            child: const Text('Add New Course', style: TextStyle(color: Color(0xFF0D47A1))),
           ),
           Expanded(
             child: ListView.builder(
@@ -145,7 +146,7 @@ class _CourseManagementScreenState extends State<CourseManagementScreen> {
               itemBuilder: (context, index) {
                 Course course = _filteredCourses[index];
                 return ListTile(
-                  title: Text(course.courseFullName),
+                  title: Text(course.courseFullName, style: GoogleFonts.poppins(),),
                   onTap: () {
                     Navigator.push(
                       context,
