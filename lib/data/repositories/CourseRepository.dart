@@ -36,4 +36,25 @@ class CourseRepository {
       throw Exception('Failed to add course to repository');
     }
   }
+
+  Future<void> updateCourse(String courseId, String courseName, String courseFullName) async {
+    try {
+      await _firestore.collection('courses').doc(courseId).update({
+        'courseName': courseName,
+        'courseFullName': courseFullName,
+      });
+    } catch (error) {
+      print('Error updating course: $error');
+      throw Exception('Failed to update course');
+    }
+  }
+
+  Future<void> deleteCourse(String courseId) async {
+    try {
+      await _firestore.collection('courses').doc(courseId).delete();
+    } catch (error) {
+      print('Error deleting course: $error');
+      throw Exception('Failed to delete course');
+    }
+  }
 }

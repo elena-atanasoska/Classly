@@ -1,7 +1,6 @@
 import 'package:classly/application/services/CourseService.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-
 import '../../domain/models/Course.dart';
 import 'course_details_screen.dart';
 
@@ -18,8 +17,7 @@ class _CourseManagementScreenState extends State<CourseManagementScreen> {
   List<Course> _courses = [];
   List<Course> _filteredCourses = [];
   final TextEditingController _courseNameController = TextEditingController();
-  final TextEditingController _courseFullNameController =
-      TextEditingController();
+  final TextEditingController _courseFullNameController = TextEditingController();
   final TextEditingController _searchController = TextEditingController();
 
   @override
@@ -90,8 +88,7 @@ class _CourseManagementScreenState extends State<CourseManagementScreen> {
                 try {
                   String courseName = _courseNameController.text;
                   String courseFullName = _courseFullNameController.text;
-                  await widget.courseService
-                      .addCourse(courseName, courseFullName);
+                  await widget.courseService.addCourse(courseName, courseFullName);
                   _courseNameController.clear();
                   _courseFullNameController.clear();
                   Navigator.of(context).pop();
@@ -123,14 +120,11 @@ class _CourseManagementScreenState extends State<CourseManagementScreen> {
                 labelText: 'Search',
                 prefixIcon: const Icon(Icons.search),
                 border: OutlineInputBorder(
-                  borderRadius:
-                      BorderRadius.circular(50.0), // Make search field rounder
+                  borderRadius: BorderRadius.circular(50.0),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(30.0),
-                  // Round the border on focus
-                  borderSide:
-                      BorderSide.none, // Remove border side for rounded corners
+                  borderSide: BorderSide.none,
                 ),
                 contentPadding: const EdgeInsets.symmetric(horizontal: 20.0),
               ),
@@ -146,15 +140,17 @@ class _CourseManagementScreenState extends State<CourseManagementScreen> {
               itemBuilder: (context, index) {
                 Course course = _filteredCourses[index];
                 return ListTile(
-                  title: Text(course.courseFullName, style: GoogleFonts.poppins(),),
-                  onTap: () {
-                    Navigator.push(
+                  title: Text(course.courseFullName, style: GoogleFonts.poppins()),
+                  onTap: () async {
+                    final result = await Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) =>
-                            CourseDetailsScreen(course: course),
+                        builder: (context) => CourseDetailsScreen(course: course),
                       ),
                     );
+                    if (result == true) {
+                      _fetchCourses();
+                    }
                   },
                 );
               },
