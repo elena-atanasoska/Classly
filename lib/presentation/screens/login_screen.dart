@@ -66,6 +66,7 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
               SizedBox(height: 20),
               TextField(
+                style: GoogleFonts.poppins(),
                 controller: _emailController,
                 decoration: InputDecoration(
                   labelText: 'Email',
@@ -79,6 +80,7 @@ class _LoginScreenState extends State<LoginScreen> {
               SizedBox(height: 10),
               TextField(
                 controller: _passwordController,
+                style: GoogleFonts.poppins(),
                 decoration: InputDecoration(
                   labelText: 'Password',
                   labelStyle: GoogleFonts.poppins(

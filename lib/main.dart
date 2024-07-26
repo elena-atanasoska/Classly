@@ -74,18 +74,18 @@ class MyApp extends StatelessWidget {
           hintStyle: GoogleFonts.poppins(),
           floatingLabelStyle: GoogleFonts.poppins(),
           errorStyle: GoogleFonts.poppins(),
-          border: OutlineInputBorder(
-            borderSide: BorderSide(color: customColor),
-          ),
-          focusedBorder: OutlineInputBorder(
-            borderSide: BorderSide(color: customColor),
-          ),
-          enabledBorder: OutlineInputBorder(
-            borderSide: BorderSide(color: customColor),
-          ),
-          disabledBorder: OutlineInputBorder(
-            borderSide: BorderSide(color: customColor),
-          ),
+          // border: OutlineInputBorder(
+          //   borderSide: BorderSide(color: customColor),
+          // ),
+          // focusedBorder: OutlineInputBorder(
+          //   borderSide: BorderSide(color: customColor),
+          // ),
+          // enabledBorder: OutlineInputBorder(
+          //   borderSide: BorderSide(color: customColor),
+          // ),
+          // disabledBorder: OutlineInputBorder(
+          //   borderSide: BorderSide(color: customColor),
+          // ),
         ),
         dropdownMenuTheme: DropdownMenuThemeData(
           textStyle: GoogleFonts.poppins(
