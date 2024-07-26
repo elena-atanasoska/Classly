@@ -60,11 +60,11 @@ class _LoginScreenState extends State<LoginScreen> {
           child: Column(
             children: [
               SizedBox(height: 40),
-              // Image.asset(
-              //   'assets/images/expiremind-high-resolution-logo-transparent.png',
-              //   height: 100,
-              // ),
-              // SizedBox(height: 20),
+              Image.asset(
+                'assets/images/classly-high-resolution-logo-transparent.png',
+                height: 100,
+              ),
+              SizedBox(height: 20),
               TextField(
                 controller: _emailController,
                 decoration: InputDecoration(
