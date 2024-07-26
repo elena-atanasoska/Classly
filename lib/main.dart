@@ -1,8 +1,11 @@
-import 'package:classly/presentation/screens/splashscreen.dart';
+import 'package:classly/presentation/screens/bottom_navigation.dart';
+import 'package:classly/presentation/screens/login_screen.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 import 'package:google_fonts/google_fonts.dart';
+
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -74,18 +77,6 @@ class MyApp extends StatelessWidget {
           hintStyle: GoogleFonts.poppins(),
           floatingLabelStyle: GoogleFonts.poppins(),
           errorStyle: GoogleFonts.poppins(),
-          // border: OutlineInputBorder(
-          //   borderSide: BorderSide(color: customColor),
-          // ),
-          // focusedBorder: OutlineInputBorder(
-          //   borderSide: BorderSide(color: customColor),
-          // ),
-          // enabledBorder: OutlineInputBorder(
-          //   borderSide: BorderSide(color: customColor),
-          // ),
-          // disabledBorder: OutlineInputBorder(
-          //   borderSide: BorderSide(color: customColor),
-          // ),
         ),
         dropdownMenuTheme: DropdownMenuThemeData(
           textStyle: GoogleFonts.poppins(
@@ -93,7 +84,27 @@ class MyApp extends StatelessWidget {
           ),
         ),
       ),
-      home: const Splashscreen(),
+      home: AuthChecker(),
+    );
+  }
+}
+
+class AuthChecker extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return StreamBuilder<User?>(
+      stream: FirebaseAuth.instance.authStateChanges(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return Center(child: CircularProgressIndicator());
+        } else {
+          if (snapshot.hasData) {
+            return BottomNavigation();
+          } else {
+            return LoginScreen();
+          }
+        }
+      },
     );
   }
 }
