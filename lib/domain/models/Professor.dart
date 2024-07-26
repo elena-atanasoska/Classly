@@ -44,4 +44,8 @@ class Professor {
     final uuid = Uuid();
     return uuid.v4();
   }
+  String getFullName() {
+    return '$firstName $lastName';
+  }
+
 }

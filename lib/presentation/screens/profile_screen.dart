@@ -2,6 +2,8 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:classly/application/services/CourseService.dart';
+import 'package:classly/application/services/RoomService.dart';
+import 'package:classly/presentation/screens/room_management_screen.dart';
 import 'package:classly/presentation/screens/user_management_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
@@ -27,6 +29,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   final AuthService _authService = AuthService();
   final UserService _userService = UserService();
   final CourseService _courseService = CourseService();
+  final RoomService _roomService = RoomService();
   final ImagePicker _imagePicker = ImagePicker();
 
   CustomUser? _user;
@@ -135,6 +138,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
+  void _showRoomManagement() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => RoomManagementScreen(roomService: _roomService),
+      ),
+    );
+  }
+
   void _updateUserRole(String userId, String newRole) async {
     try {
       await _userService.updateUserRole(userId, newRole);
@@ -210,6 +222,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ElevatedButton(
                 onPressed: _showCourseManagement,
                 child: Text('Manage Courses'),
+              ),
+              SizedBox(height: 15.0),
+              ElevatedButton(
+                onPressed: _showRoomManagement,
+                child: Text('Manage Rooms'),
               ),
             ],
           ],

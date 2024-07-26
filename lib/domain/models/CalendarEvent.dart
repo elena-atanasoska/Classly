@@ -81,4 +81,5 @@ class CalendarEvent extends Appointment {
 
   @override
   List<Object?> get props => [id, startTime, endTime, title, description];
+
 }

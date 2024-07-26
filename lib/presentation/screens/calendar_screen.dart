@@ -103,7 +103,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => EventScreen(),
+        builder: (context) => EventScreen(event: event),
       ),
     );
   }
