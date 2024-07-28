@@ -58,7 +58,7 @@ class CustomUser {
       lastName: data['lastName'] ?? '',
       photoURL: data['photoURL'] ?? '',
       enrolledCourses: enrolledCoursesData != null
-          ? List<String>.from(enrolledCoursesData) // Ensure it's a List<String>
+          ? List<String>.from(enrolledCoursesData)
           : [],
       role: role,
     );

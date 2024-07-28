@@ -8,7 +8,6 @@ import 'package:classly/presentation/screens/user_management_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:http/http.dart' as http;
 
@@ -34,8 +33,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   CustomUser? _user;
   List<Course> _enrolledCourses = [];
-  List<Course> _availableCourses = [];
-  List<Course> _selectedCourses = [];
   Uint8List? _profileImage;
   List<CustomUser> _allUsers = [];
 
@@ -43,69 +40,49 @@ class _ProfileScreenState extends State<ProfileScreen> {
   void initState() {
     super.initState();
     _updateUser();
-    _fetchEnrolledCourses();
-    _fetchAvailableCourses();
-    _fetchAllUsers();
-    _auth.authStateChanges().listen((User? user) {});
+    _auth.authStateChanges().listen((User? user) {
+      if (user != null) {
+        _fetchEnrolledCourses(user.uid);
+      }
+    });
   }
 
   void _updateUser() async {
     User? currentUser = await _authService.getCurrentUser();
     if (currentUser != null) {
-      _user = CustomUser.fromFirebaseUser(currentUser);
+      CustomUser? userFromService = await _userService.getUser(currentUser.uid);
+      setState(() {
+        _user = userFromService;
+      });
 
+      if (_user != null) {
+        _fetchProfileImage(_user!.photoURL);
+        _fetchEnrolledCourses(_user!.uid);
+      }
+    }
+  }
+
+  Future<void> _fetchProfileImage(String? profileImageUrl) async {
+    if (profileImageUrl != null) {
       try {
-        CustomUser? userFromService = await _userService.getUser(_user!.uid);
-        if (userFromService != null) {
-          _user = userFromService;
-          String? profileImageUrl = userFromService.photoURL;
-
-          if (profileImageUrl != null) {
-            http.Response response = await http.get(Uri.parse(profileImageUrl));
-            setState(() {
-              _profileImage = Uint8List.fromList(response.bodyBytes);
-            });
-          }
-        }
+        http.Response response = await http.get(Uri.parse(profileImageUrl));
+        setState(() {
+          _profileImage = Uint8List.fromList(response.bodyBytes);
+        });
       } catch (error) {
         print('Error loading profile image: $error');
       }
     }
   }
 
-  void _fetchEnrolledCourses() async {
-    if (_user != null) {
-      try {
-        List<Course> enrolledCourses = await _userService.getEnrolledCourses(_user!.uid);
-        setState(() {
-          _enrolledCourses = enrolledCourses;
-        });
-        print('Enrolled courses: $_enrolledCourses');
-      } catch (error) {
-        print('Error fetching enrolled courses: $error');
-      }
-    }
-  }
-
-  void _fetchAvailableCourses() async {
+  Future<void> _fetchEnrolledCourses(String userId) async {
     try {
-      List<Course> courses = await _courseService.getAvailableCourses();
+      List<Course> enrolledCourses = await _userService.getEnrolledCourses(userId);
       setState(() {
-        _availableCourses = courses;
+        _enrolledCourses = enrolledCourses;
       });
     } catch (error) {
-      print('Error fetching courses: $error');
-    }
-  }
-
-  void _fetchAllUsers() async {
-    try {
-      List<CustomUser> users = await _userService.getAllUsers();
-      setState(() {
-        _allUsers = users;
-      });
-    } catch (error) {
-      print('Error fetching users: $error');
+      print('Error fetching enrolled courses: $error');
     }
   }
 
@@ -122,7 +99,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
       context,
       MaterialPageRoute(
         builder: (context) => UserManagementScreen(
-          users: _allUsers,
           userService: _userService,
         ),
       ),
@@ -145,15 +121,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
         builder: (context) => RoomManagementScreen(roomService: _roomService),
       ),
     );
-  }
-
-  void _updateUserRole(String userId, String newRole) async {
-    try {
-      await _userService.updateUserRole(userId, newRole);
-      _fetchAllUsers();
-    } catch (error) {
-      print('Error updating user role: $error');
-    }
   }
 
   @override
@@ -184,7 +151,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             SizedBox(height: 30),
             Text(
               'Name:',
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.blue),
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Color(0xFF0D47A1)),
             ),
             SizedBox(height: 8),
             Text(
@@ -194,7 +161,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             SizedBox(height: 16),
             const Text(
               'Email:',
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.blue),
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Color(0xFF0D47A1)),
             ),
             SizedBox(height: 8),
             Text(
@@ -202,17 +169,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
               style: TextStyle(fontSize: 20),
             ),
             SizedBox(height: 16),
-            if (_user?.isProfessor != true) ...[
-            Text(
-              'Enrolled Courses:',
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.blue),
-            ),
-            SizedBox(height: 8),
-            ..._enrolledCourses.map((course) => Text(
-              course.courseFullName,
-              style: TextStyle(fontSize: 20, color: Colors.black),
-            )),] else
-            SizedBox(height: 16),
+              Text(
+                'Enrolled Courses:',
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Color(0xFF0D47A1)),
+              ),
+              SizedBox(height: 8),
+              ..._enrolledCourses.map((course) => Text(
+                course.courseFullName,
+                style: TextStyle(fontSize: 20, color: Colors.black),
+              )),
+              SizedBox(height: 16),
             if (_user?.isProfessor == true) ...[
               ElevatedButton(
                 onPressed: _showUserManagement,
@@ -232,13 +198,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ],
         ),
       ),
-      // floatingActionButton: FloatingActionButton(
-      //   onPressed: () {
-      //     _showEnrollmentDialog(context);
-      //   },
-      //   tooltip: 'Enroll in Course',
-      //   child: Icon(Icons.add),
-      // ),
     );
   }
 
@@ -314,57 +273,5 @@ class _ProfileScreenState extends State<ProfileScreen> {
     } catch (error) {
       print('Error uploading profile image: $error');
     }
-  }
-
-  void _showEnrollmentDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('Enroll in Courses'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              ..._availableCourses.map((course) => CheckboxListTile(
-                title: Text(course.courseFullName),
-                value: _selectedCourses.contains(course),
-                onChanged: (bool? selected) {
-                  setState(() {
-                    if (selected != null) {
-                      if (selected) {
-                        _selectedCourses.add(course);
-                      } else {
-                        _selectedCourses.remove(course);
-                      }
-                    }
-                  });
-                },
-              )),
-            ],
-          ),
-          actions: [
-            TextButton(
-              child: Text('Cancel'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-            TextButton(
-              child: Text('Enroll'),
-              onPressed: () async {
-                try {
-                  await _userService.enrollInCourses(
-                      _user!.uid, _selectedCourses);
-                  Navigator.of(context).pop();
-                  _fetchEnrolledCourses();
-                } catch (error) {
-                  print('Error enrolling in courses: $error');
-                }
-              },
-            ),
-          ],
-        );
-      },
-    );
   }
 }

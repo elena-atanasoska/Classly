@@ -26,57 +26,65 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
       appBar: AppBar(
         title: Text('Registration'),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            TextField(
-              controller: _firstNameController,
-              decoration: InputDecoration(labelText: 'First Name'),
-            ),
-            SizedBox(height: 10),
-            TextField(
-              controller: _lastNameController,
-              decoration: InputDecoration(labelText: 'Last Name'),
-            ),
-            SizedBox(height: 10),
-            TextField(
-              controller: _emailController,
-              decoration: InputDecoration(labelText: 'Email'),
-            ),
-            SizedBox(height: 10),
-            TextField(
-              controller: _passwordController,
-              decoration: InputDecoration(labelText: 'Password'),
-              obscureText: true,
-            ),
-            SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: () {
-                registerUser(
-                  _firstNameController.text,
-                  _lastNameController.text,
-                  _emailController.text,
-                  _passwordController.text,
-                  context,
-                );
-              },
-              child: Text('Register'),
-            ),
-            SizedBox(height: 20),
-            TextButton(
-              onPressed: () {
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(builder: (context) => LoginScreen()),
-                );
-              },
-              child: Text('Already have an account? Login'),
-            ),
-          ],
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              SizedBox(height: 40),
+              Image.asset(
+                'assets/images/classly-high-resolution-logo-transparent.png',
+                height: 100,
+              ),
+              SizedBox(height: 20),
+              TextField(
+                controller: _firstNameController,
+                decoration: InputDecoration(labelText: 'First Name'),
+              ),
+              SizedBox(height: 10),
+              TextField(
+                controller: _lastNameController,
+                decoration: InputDecoration(labelText: 'Last Name'),
+              ),
+              SizedBox(height: 10),
+              TextField(
+                controller: _emailController,
+                decoration: InputDecoration(labelText: 'Email'),
+              ),
+              SizedBox(height: 10),
+              TextField(
+                controller: _passwordController,
+                decoration: InputDecoration(labelText: 'Password'),
+                obscureText: true,
+              ),
+              SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: () {
+                  registerUser(
+                    _firstNameController.text,
+                    _lastNameController.text,
+                    _emailController.text,
+                    _passwordController.text,
+                    context,
+                  );
+                },
+                child: Text('Register'),
+              ),
+              SizedBox(height: 20),
+              TextButton(
+                onPressed: () {
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(builder: (context) => LoginScreen()),
+                  );
+                },
+                child: Text('Already have an account? Login'),
+              ),
+            ],
+          ),
         ),
-      ),
+      )
     );
   }
 

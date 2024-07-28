@@ -22,17 +22,14 @@ class UserRepository {
 
   Future<List<Course>> getEnrolledCourses(String uid) async {
     try {
-      QuerySnapshot userQuerySnapshot = await _firestore
+      DocumentSnapshot userDoc = await _firestore
           .collection('custom_users')
-          .where('uid', isEqualTo: uid)
-          .limit(1)
+          .doc(uid)
           .get();
 
-      if (userQuerySnapshot.docs.isEmpty) {
+      if (!userDoc.exists) {
         return [];
       }
-
-      DocumentSnapshot userDoc = userQuerySnapshot.docs.first;
 
       List<String> enrolledCourseIds = List<String>.from(userDoc.get('enrolledCourses') ?? []);
 

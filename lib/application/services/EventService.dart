@@ -16,7 +16,7 @@ class EventService {
     await _eventRepository.deleteCalendarEvent(eventId);
   }
 
-  Future<List<CalendarEvent>> getEventsForDay(DateTime date) async {
-    return await _eventRepository.getEventsForDay(date);
+  Future<List<CalendarEvent>> getEventsForDay(DateTime date, List<String> enrolledCourseIds) async {
+    return await _eventRepository.getEventsForDay(date, enrolledCourseIds);
   }
 }
