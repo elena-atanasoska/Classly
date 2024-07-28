@@ -87,13 +87,16 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
                 return ListTile(
                   title: Text(user.getFullName() ?? 'No name available', style: GoogleFonts.poppins()),
                   subtitle: Text("${user.email}, ${user.role.name}", style: GoogleFonts.poppins()),
-                  onTap: () {
-                    Navigator.push(
+                  onTap: () async {
+                    final result = await Navigator.push(
                       context,
                       MaterialPageRoute(
                         builder: (context) => UserDetailsScreen(user: user, userService: widget.userService),
                       ),
                     );
+                    if (result == true) {
+                      _fetchUsers();
+                    }
                   },
                 );
               },

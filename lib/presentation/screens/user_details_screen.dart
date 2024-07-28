@@ -141,6 +141,7 @@ class _UserDetailsScreenState extends State<UserDetailsScreen> {
                       setState(() {
                         selectedRole = newValue;
                       });
+                      Navigator.pop(context, true);
                     }
                   },
                   items: <String>['Student', 'Professor']
