@@ -96,7 +96,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
       context,
       MaterialPageRoute(
         builder: (context) => UserManagementScreen(
-          users: _allUsers,
           userService: _userService,
         ),
       ),
