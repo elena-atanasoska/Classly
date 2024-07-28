@@ -129,6 +129,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
       builder: (context) => AddEventForm(
         selectedDate: selectedDate,
         enrolledCourses: enrolledCourses,
+        currentUser: this.currentUser, // Add this line
         onAddEvent: (CalendarEvent event) async {
           await eventService.saveEvent(event);
           _loadEventsForCurrentDay(selectedDate);
@@ -137,11 +138,12 @@ class _CalendarScreenState extends State<CalendarScreen> {
     );
   }
 
+
   Future<void> _showEventDetailsDialog(CalendarEvent event) async {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => EventScreen(),
+        builder: (context) => EventScreen(event: event),
       ),
     );
   }

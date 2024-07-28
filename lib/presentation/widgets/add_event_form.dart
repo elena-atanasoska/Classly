@@ -1,11 +1,12 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:uuid/uuid.dart';
 
-import '../../application/services/CourseService.dart';
 import '../../domain/models/CalendarEvent.dart';
 import '../../domain/models/Course.dart';
+import '../../domain/models/CustomUser.dart';
 import '../../domain/models/Professor.dart';
 import '../../domain/models/Room.dart';
 
@@ -13,12 +14,14 @@ class AddEventForm extends StatefulWidget {
   final DateTime selectedDate;
   final Function(CalendarEvent event) onAddEvent;
   final List<Course> enrolledCourses; // Add this line
+  final CustomUser? currentUser; // Add this line
 
   const AddEventForm({
     Key? key,
     required this.selectedDate,
     required this.onAddEvent,
-    required this.enrolledCourses, // Add this line
+    required this.enrolledCourses,
+    required this.currentUser, // Add this line
   }) : super(key: key);
 
   @override
@@ -33,6 +36,8 @@ class _AddEventFormState extends State<AddEventForm> {
   TextEditingController durationController = TextEditingController(text: '2');
   TextEditingController occurrenceController = TextEditingController();
   Course? selectedCourse;
+  Room? selectedRoom;
+  List<Room> rooms = [];
 
 
   @override
@@ -40,6 +45,7 @@ class _AddEventFormState extends State<AddEventForm> {
     super.initState();
     dateController.text = formatDate(widget.selectedDate);
     timeController.text = formatTime(widget.selectedDate);
+    _fetchAvailableRooms();
   }
 
   String formatDate(DateTime dateTime) {
@@ -48,6 +54,18 @@ class _AddEventFormState extends State<AddEventForm> {
 
   String formatTime(DateTime dateTime) {
     return '${dateTime.hour.toString().padLeft(2, '0')}:${dateTime.minute.toString().padLeft(2, '0')}';
+  }
+
+  Future<void> _fetchAvailableRooms() async {
+    final firestore = FirebaseFirestore.instance;
+    final roomCollection = firestore.collection('rooms');
+    final snapshot = await roomCollection.get();
+
+    rooms = snapshot.docs.map((doc) {
+      final data = doc.data();
+      return Room.fromMap(data);
+    }).toList();
+    setState(() {});
   }
 
   List<CalendarEvent> _generateRecurringAppointments(CalendarEvent event, String rrule) {
@@ -245,6 +263,21 @@ class _AddEventFormState extends State<AddEventForm> {
                       },
                     ),
                     SizedBox(height: 15.0),
+                    DropdownButtonFormField<Room>(
+                      hint: Text('Select a Room', style: GoogleFonts.poppins()),
+                      value: selectedRoom,
+                      items: rooms.map<DropdownMenuItem<Room>>((Room room) {
+                        return DropdownMenuItem<Room>(
+                          value: room,
+                          child: Text(room.name, style: GoogleFonts.poppins()),
+                        );
+                      }).toList(),
+                      onChanged: (Room? newValue) {
+                        setState(() {
+                          selectedRoom = newValue;
+                        });
+                      },
+                    ),
                     ElevatedButton(
                       onPressed: () {
                         if (_formKey.currentState!.validate()) {
@@ -256,18 +289,12 @@ class _AddEventFormState extends State<AddEventForm> {
                                 title: titleController.text,
                                 description: '',
                                 professor: Professor(
-                                  id: '1',
-                                  firstName: 'John',
-                                  lastName: 'Doe',
-                                  email: 'john.doe@example.com',
+                                  id: widget.currentUser!.uid, // Use currentUser's ID
+                                  firstName: widget.currentUser!.firstName, // Use currentUser's first name
+                                  lastName: widget.currentUser!.lastName, // Use currentUser's last name
+                                  email: widget.currentUser!.email, // Use currentUser's email
                                 ),
-                                room: Room(
-                                  id: '215',
-                                  name: 'Room 215',
-                                  building: 'Main Building',
-                                  floor: '1',
-                                  seats: [1, 2, 3, 4],
-                                ),
+                                room: selectedRoom!,
                                 course: selectedCourse!,
                                 startTime: eventDateTime,
                                 endTime: eventDateTime.add(Duration(
@@ -294,18 +321,12 @@ class _AddEventFormState extends State<AddEventForm> {
                                   title: titleController.text,
                                   description: "",
                                   professor: Professor(
-                                    id: '1',
-                                    firstName: 'John',
-                                    lastName: 'Doe',
-                                    email: 'john.doe@example.com',
+                                    id: widget.currentUser!.uid, // Use currentUser's ID
+                                    firstName: widget.currentUser!.firstName, // Use currentUser's first name
+                                    lastName: widget.currentUser!.lastName, // Use currentUser's last name
+                                    email: widget.currentUser!.email, // Use currentUser's email
                                   ),
-                                  room: Room(
-                                    id: '215',
-                                    name: 'Room 215',
-                                    building: 'Main Building',
-                                    floor: '1',
-                                    seats: [1, 2, 3, 4],
-                                  ),
+                                  room: selectedRoom!,
                                   course: selectedCourse!,
                                   startTime: eventDateTime,
                                   endTime: eventDateTime.add(Duration(
