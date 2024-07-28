@@ -42,6 +42,7 @@ class _CourseDetailsScreenState extends State<CourseDetailsScreen> {
                 setState(() {
                   course = updatedCourse;
                 });
+                Navigator.pop(context, true);
               }
             },
           ),
@@ -120,7 +121,7 @@ class _CourseDetailsScreenState extends State<CourseDetailsScreen> {
               onPressed: () async {
                 try {
                   await _courseService.deleteCourse(course.courseId);
-                  Navigator.pop(context, true); // Notify that deletion happened
+                  Navigator.pop(context, true);
                   Navigator.pop(context, true);
                 } catch (error) {
                   print('Error deleting course: $error');
