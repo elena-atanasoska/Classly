@@ -1,3 +1,6 @@
+import 'package:classly/application/services/AuthService.dart';
+import 'package:classly/application/services/UserService.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:syncfusion_flutter_calendar/calendar.dart';
@@ -6,6 +9,7 @@ import '../../application/services/CourseService.dart';
 import '../../application/services/EventService.dart';
 import '../../application/services/NotificationsService.dart';
 import '../../domain/models/CalendarEvent.dart';
+import '../../domain/models/CustomUser.dart';
 import '../widgets/add_event_form.dart';
 import '../widgets/weather_widget.dart';
 import 'event_screen.dart';
@@ -18,14 +22,26 @@ class CalendarScreen extends StatefulWidget {
 class _CalendarScreenState extends State<CalendarScreen> {
   List<CalendarEvent> appointments = [];
   MeetingDataSource? events;
+  CustomUser? currentUser;
   final EventService eventService = EventService();
   final CourseService courseService = CourseService();
   final NotificationsService notificationsService = NotificationsService();
+  final AuthService authService = AuthService();
+  final UserService userService = UserService();
 
   @override
   void initState() {
     super.initState();
+    _loadUser();
     _loadEventsForCurrentDay(DateTime.now());
+  }
+
+  Future<void> _loadUser() async {
+    User? user = await authService.getCurrentUser();
+    CustomUser? customUser = await userService.getUser(user!.uid);
+    setState(() {
+      currentUser = customUser;
+    });
   }
 
   Future<void> _loadEventsForCurrentDay(DateTime date) async {
@@ -73,7 +89,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                 _showEventDetailsDialog(details.appointments![0]);
               } else if (details.targetElement ==
                   CalendarElement.calendarCell) {
-                _showAddEventDialog(details.date!);
+                _showAddEventForm(details.date!);
               }
             },
             onViewChanged: (ViewChangedDetails details) {
@@ -82,16 +98,18 @@ class _CalendarScreenState extends State<CalendarScreen> {
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton(
+      floatingActionButton: currentUser?.isProfessor == true
+          ? FloatingActionButton(
         onPressed: () {
-          _showAddEventDialog(DateTime.now());
+          _showAddEventForm(DateTime.now());
         },
         child: const Icon(Icons.add),
-      ),
+      )
+          : null,
     );
   }
 
-  Future<void> _showAddEventDialog(DateTime selectedDate) async {
+  Future<void> _showAddEventForm(DateTime selectedDate) async {
     await showDialog(
       context: context,
       builder: (context) => AddEventForm(
