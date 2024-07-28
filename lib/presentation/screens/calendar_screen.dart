@@ -9,6 +9,7 @@ import '../../application/services/CourseService.dart';
 import '../../application/services/EventService.dart';
 import '../../application/services/NotificationsService.dart';
 import '../../domain/models/CalendarEvent.dart';
+import '../../domain/models/Course.dart';
 import '../../domain/models/CustomUser.dart';
 import '../widgets/add_event_form.dart';
 import '../widgets/weather_widget.dart';
@@ -42,6 +43,13 @@ class _CalendarScreenState extends State<CalendarScreen> {
     setState(() {
       currentUser = customUser;
     });
+  }
+
+  Future<List<Course>> _getEnrolledCourses() async {
+    if (currentUser != null) {
+      return await userService.getEnrolledCourses(currentUser!.uid);
+    }
+    return [];
   }
 
   Future<void> _loadEventsForCurrentDay(DateTime date) async {
@@ -110,10 +118,12 @@ class _CalendarScreenState extends State<CalendarScreen> {
   }
 
   Future<void> _showAddEventForm(DateTime selectedDate) async {
+    List<Course> enrolledCourses = await _getEnrolledCourses();
     await showDialog(
       context: context,
       builder: (context) => AddEventForm(
         selectedDate: selectedDate,
+        enrolledCourses: enrolledCourses,
         onAddEvent: (CalendarEvent event) async {
           await eventService.saveEvent(event);
           _loadEventsForCurrentDay(selectedDate);

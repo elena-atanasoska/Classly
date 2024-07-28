@@ -12,11 +12,13 @@ import '../../domain/models/Room.dart';
 class AddEventForm extends StatefulWidget {
   final DateTime selectedDate;
   final Function(CalendarEvent event) onAddEvent;
+  final List<Course> enrolledCourses; // Add this line
 
   const AddEventForm({
     Key? key,
     required this.selectedDate,
     required this.onAddEvent,
+    required this.enrolledCourses, // Add this line
   }) : super(key: key);
 
   @override
@@ -32,10 +34,6 @@ class _AddEventFormState extends State<AddEventForm> {
   TextEditingController occurrenceController = TextEditingController();
   Course? selectedCourse;
 
-  Future<List<Course>> _fetchAvailableCourses() async {
-    final courseService = CourseService();
-    return await courseService.getAvailableCourses();
-  }
 
   @override
   void initState() {
@@ -131,17 +129,7 @@ class _AddEventFormState extends State<AddEventForm> {
       appBar: AppBar(
         title: Text('Add Event', style: TextStyle(color: Color(0xFF0D47A1))),
       ),
-      body: FutureBuilder<List<Course>>(
-        future: _fetchAvailableCourses(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(child: CircularProgressIndicator());
-          } else if (snapshot.hasError) {
-            return Center(child: Text('Error: ${snapshot.error}'));
-          } else {
-            List<Course> courses = snapshot.data!;
-
-            return Padding(
+      body: Padding(
               padding: const EdgeInsets.all(16.0),
               child: Form(
                 key: _formKey,
@@ -236,7 +224,7 @@ class _AddEventFormState extends State<AddEventForm> {
                       hint:
                           Text('Select a Course', style: GoogleFonts.poppins()),
                       value: selectedCourse,
-                      items: courses
+                      items: widget.enrolledCourses
                           .map<DropdownMenuItem<Course>>((Course course) {
                         return DropdownMenuItem<Course>(
                           value: course,
@@ -339,10 +327,7 @@ class _AddEventFormState extends State<AddEventForm> {
                   ],
                 ),
               ),
-            );
-          }
-        },
-      ),
+            )
     );
   }
 }
