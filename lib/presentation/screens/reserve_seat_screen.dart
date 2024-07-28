@@ -1,11 +1,10 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import '../../application/services/AuthService.dart';
+import 'package:intl/intl.dart';
 import '../../application/services/ReservationService.dart';
-import '../../application/services/UserService.dart';
 import '../../domain/models/CalendarEvent.dart';
-import '../../domain/models/CustomUser.dart';
 import '../../domain/models/Seat.dart';
+import '../../application/services/AuthService.dart';
+import '../../application/services/UserService.dart';
 
 class ReserveSeatScreen extends StatefulWidget {
   final CalendarEvent event;
@@ -17,8 +16,7 @@ class ReserveSeatScreen extends StatefulWidget {
 }
 
 class _ReserveSeatScreenState extends State<ReserveSeatScreen> {
-  late Seat? selectedSeat;
-  CustomUser? _currentUser;
+  Seat? selectedSeat;
   final ReservationService reservationService = ReservationService();
   final AuthService _authService = AuthService();
   final UserService _userService = UserService();
@@ -27,18 +25,6 @@ class _ReserveSeatScreenState extends State<ReserveSeatScreen> {
   void initState() {
     super.initState();
     selectedSeat = null;
-    _fetchCurrentUser();
-  }
-
-  Future<void> _fetchCurrentUser() async {
-    User? user = await _authService.getCurrentUser();
-    if (user != null) {
-      setState(() {
-
-        _currentUser = CustomUser.fromFirebaseUser(user);
-      });
-      _currentUser = CustomUser.fromFirebaseUser(user);
-    }
   }
 
   void _selectSeat(Seat seat) {
@@ -48,64 +34,38 @@ class _ReserveSeatScreenState extends State<ReserveSeatScreen> {
   }
 
   Future<void> _reserveSeat() async {
-    if (selectedSeat == null || _currentUser == null) {
-      // Show an error message
+    final user = await _authService.getCurrentUser();
+    if (selectedSeat == null || user == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
+        const SnackBar(
           content: Text('Please select a seat and ensure you are logged in.'),
         ),
       );
       return;
     }
 
-    // Check if the user has already reserved a seat for this event
-    // This example assumes you have a function to check this
-
-    bool alreadyReserved = await checkIfUserHasReservedSeat(
-      widget.event.id,
-      _currentUser!.uid,
-    );
+    bool alreadyReserved =
+        await reservationService.checkReservation(user.uid, widget.event.id);
 
     if (alreadyReserved) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
+        const SnackBar(
           content: Text('You have already reserved a seat for this event.'),
         ),
       );
       return;
     }
 
-    // Reserve the seat in the database
-    await reserveSeatInDatabase(
-      eventId: widget.event.id,
-      userId: _currentUser!.uid,
-      seat: selectedSeat!,
-    );
-
+    await reservationService.reserveSeat(
+        user.uid, widget.event.id, selectedSeat!);
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
+      const SnackBar(
         content: Text('Seat reserved successfully!'),
       ),
     );
 
-    // Navigate back or show a success message
+    Navigator.pop(context, true); // Pass result back to the EventScreen
   }
-
-  Future<bool> checkIfUserHasReservedSeat(String eventId, String userId) async {
-    // Implement the logic to check if the user has already reserved a seat for the event
-    // For example, you could query Firestore to see if there's an existing reservation
-    return false;
-  }
-
-  Future<void> reserveSeatInDatabase({
-    required String eventId,
-    required String userId,
-    required Seat seat,
-  }) async {
-    // Implement the logic to save the seat reservation to the database
-    // For example, you could add a document to a "reservations" collection in Firestore
-  }
-
 
   @override
   Widget build(BuildContext context) {
@@ -124,48 +84,59 @@ class _ReserveSeatScreenState extends State<ReserveSeatScreen> {
             ),
             const SizedBox(height: 20),
             Expanded(
-              child: GridView.builder(
-                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: widget.event.room.columns,
-                  childAspectRatio: 1.5,
-                ),
-                itemCount: widget.event.room.rows * widget.event.room.columns,
-                itemBuilder: (context, index) {
-                  int row = index ~/ widget.event.room.columns;
-                  int column = index % widget.event.room.columns;
-                  Seat seat = widget.event.room.seats[row][column];
-                  bool isSelected = selectedSeat == seat;
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 0.0),
+                child: GridView.builder(
+                  shrinkWrap: true,
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: widget.event.room.columns,
+                    childAspectRatio: 1, // Adjusted to make the seats taller
+                  ),
+                  itemCount: widget.event.room.rows * widget.event.room.columns,
+                  itemBuilder: (context, index) {
+                    int row = index ~/ widget.event.room.columns;
+                    int column = index % widget.event.room.columns;
+                    Seat seat = widget.event.room.seats[row][column];
+                    bool isSelected = selectedSeat == seat;
 
-                  return GestureDetector(
-                    onTap: () {
-                      _selectSeat(seat);
-                      setState(() {
-                        selectedSeat = isSelected ? null : seat;
-                      });
-                    },
-                    child: Container(
-                      margin: const EdgeInsets.all(4.0),
-                      decoration: BoxDecoration(
-                        color: isSelected
-                            ? Colors.blue
-                            : (seat.isFree ? Colors.grey : Colors.black),
-                        border: Border.all(
-                          color: seat.isFree ? Colors.grey : Colors.black,
-                          width: 2,
+                    return GestureDetector(
+                      onTap: seat.isFree
+                          ? () {
+                              _selectSeat(seat);
+                              setState(() {
+                                selectedSeat = isSelected ? null : seat;
+                              });
+                            }
+                          : null,
+                      child: Container(
+                        margin: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 5),
+                        width: 20,
+                        // Adjust this value to make the container narrower
+                        height: 40,
+                        // Adjust this value to make the container taller
+                        decoration: BoxDecoration(
+                          color: isSelected
+                              ? Colors.blue
+                              : (seat.isFree ? Colors.grey : Colors.black),
+                          borderRadius: const BorderRadius.only(
+                            bottomLeft: Radius.circular(16),
+                            bottomRight: Radius.circular(16),
+                            topLeft: Radius.circular(0),
+                            topRight: Radius.circular(0),
+                          ),
                         ),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Center(
-                        child: Text(
-                          '${String.fromCharCode(65 + column)}${row + 1}',
-                          style: TextStyle(
-                            color: seat.isFree ? Colors.black : Colors.white,
+                        child: Center(
+                          child: Text(
+                            '${String.fromCharCode(65 + column)}${row + 1}',
+                            style: TextStyle(
+                              color: seat.isFree ? Colors.black : Colors.white,
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                  );
-                },
+                    );
+                  },
+                ),
               ),
             ),
             const SizedBox(height: 20),
@@ -177,34 +148,12 @@ class _ReserveSeatScreenState extends State<ReserveSeatScreen> {
             ),
             const SizedBox(height: 20),
             ElevatedButton(
-              onPressed: selectedSeat != null
-                  ? () async {
-                bool hasReserved = await reservationService.checkReservation(
-                    _currentUser!.uid, widget.event.id);
-                if (hasReserved) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('You have already reserved a seat for this event.'),
-                    ),
-                  );
-                } else {
-                  await reservationService.reserveSeat(
-                    _currentUser!.uid,
-                    widget.event.id,
-                    selectedSeat!,
-                  );
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Seat reserved successfully!'),
-                    ),
-                  );
-                }
-              }
-                  : null, // Disable button if no seat is selected
+              onPressed: selectedSeat != null ? _reserveSeat : null,
               child: const Text('Reserve seat'),
               style: ElevatedButton.styleFrom(
                 foregroundColor: Colors.white,
-                backgroundColor: selectedSeat != null ? Colors.blue : Colors.grey, // Button color based on seat selection
+                backgroundColor:
+                    selectedSeat != null ? Colors.blue : Colors.grey,
                 minimumSize: const Size(double.infinity, 50),
               ),
             ),
@@ -214,7 +163,7 @@ class _ReserveSeatScreenState extends State<ReserveSeatScreen> {
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             Text(
-              '${widget.event.course.courseName} at ${widget.event.startTime.hour}:${widget.event.startTime.minute} on ${widget.event.startTime.day} ${widget.event.startTime.month} ${widget.event.startTime.year}',
+              '${widget.event.course.courseFullName} at ${DateFormat('HH:mm').format(widget.event.startTime)} - ${DateFormat('HH:mm').format(widget.event.endTime)} on ${DateFormat('d MMMM yyyy').format(widget.event.startTime)}',
               style: const TextStyle(fontSize: 16),
             ),
             const SizedBox(height: 20),
@@ -238,8 +187,17 @@ class _ReserveSeatScreenState extends State<ReserveSeatScreen> {
       children: [
         Container(
           width: 20,
-          height: 20,
-          color: color,
+          height: 30,
+          decoration: BoxDecoration(
+            color: color,
+            borderRadius: const BorderRadius.only(
+              bottomLeft: Radius.circular(13),
+              bottomRight: Radius.circular(13),
+              topLeft: Radius.circular(0),
+              topRight: Radius.circular(0),
+            ),
+          ),
+
         ),
         const SizedBox(width: 5),
         Text(label),
@@ -247,4 +205,3 @@ class _ReserveSeatScreenState extends State<ReserveSeatScreen> {
     );
   }
 }
-
