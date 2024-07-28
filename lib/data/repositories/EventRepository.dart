@@ -16,12 +16,13 @@ class EventRepository {
     await _firestore.collection('calendarEvents').doc(eventId).delete();
   }
 
-  Future<List<CalendarEvent>> getEventsForDay(DateTime date) async {
+  Future<List<CalendarEvent>> getEventsForDay(DateTime date, List<String> enrolledCourseIds) async {
     try {
       Query query = _firestore
           .collection('calendarEvents')
           .where('startTime', isGreaterThanOrEqualTo: DateTime.parse(formatDate(date)))
-          .where('startTime', isLessThanOrEqualTo: DateTime.parse(formatDate(date)).add(const Duration(days: 1)));
+          .where('startTime', isLessThanOrEqualTo: DateTime.parse(formatDate(date)).add(const Duration(days: 1)))
+          .where('course.courseId', whereIn: enrolledCourseIds);
 
       QuerySnapshot querySnapshot = await query.get();
 

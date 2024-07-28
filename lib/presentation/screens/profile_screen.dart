@@ -157,7 +157,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
               style: TextStyle(fontSize: 20),
             ),
             SizedBox(height: 16),
-            if (_user?.isProfessor != true) ...[
               Text(
                 'Enrolled Courses:',
                 style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Color(0xFF0D47A1)),
@@ -167,7 +166,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 course.courseFullName,
                 style: TextStyle(fontSize: 20, color: Colors.black),
               )),
-            ] else
               SizedBox(height: 16),
             if (_user?.isProfessor == true) ...[
               ElevatedButton(

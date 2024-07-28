@@ -53,13 +53,18 @@ class _CalendarScreenState extends State<CalendarScreen> {
   }
 
   Future<void> _loadEventsForCurrentDay(DateTime date) async {
-    List<CalendarEvent> eventsForCurrentDay =
-    await eventService.getEventsForDay(date);
+    if (currentUser != null) {
+      List<Course> enrolledCourses = await _getEnrolledCourses();
+      List<String> enrolledCourseIds = enrolledCourses.map((course) => course.courseId).toList();
 
-    setState(() {
-      appointments = eventsForCurrentDay;
-      events = MeetingDataSource(appointments);
-    });
+      List<CalendarEvent> eventsForCurrentDay =
+      await eventService.getEventsForDay(date, enrolledCourseIds);
+
+      setState(() {
+        appointments = eventsForCurrentDay;
+        events = MeetingDataSource(appointments);
+      });
+    }
   }
 
   @override
