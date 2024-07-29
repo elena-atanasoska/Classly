@@ -69,7 +69,7 @@ class _RoomManagementScreenState extends State<RoomManagementScreen> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('Add New Room', style: TextStyle(color: Colors.blue)),
+          title: const Text('Add New Room', style: TextStyle(color: Color(0xFF0D47A1))),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -180,7 +180,7 @@ class _RoomManagementScreenState extends State<RoomManagementScreen> {
           ),
           ElevatedButton(
             onPressed: _showAddRoomDialog,
-            child: const Text('Add New Room', style: TextStyle(color: Colors.blue)),
+            child: const Text('Add New Room', style: TextStyle(color: Color(0xFF0D47A1))),
           ),
           Expanded(
             child: ListView.builder(

@@ -278,6 +278,7 @@ class _AddEventFormState extends State<AddEventForm> {
                         });
                       },
                     ),
+                    SizedBox(height: 15.0),
                     ElevatedButton(
                       onPressed: () {
                         if (_formKey.currentState!.validate()) {

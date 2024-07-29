@@ -1,6 +1,7 @@
 import 'package:classly/presentation/screens/reserve_seat_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 
 import '../../application/services/ReservationService.dart';
@@ -81,7 +82,7 @@ class _EventScreenState extends State<EventScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    widget.event.course.courseFullName,
+                    "${widget.event.title} - ${widget.event.course.courseFullName}",
                     style: const TextStyle(
                       color: Colors.white,
                       fontSize: 20,
@@ -94,40 +95,42 @@ class _EventScreenState extends State<EventScreen> {
             const SizedBox(height: 20),
             const Text(
               'Class details',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 14),
             const Text('Professor:',
-                style: TextStyle(fontWeight: FontWeight.bold)),
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
             Padding(
               padding: const EdgeInsets.only(left: 10.0),
               child: ListTile(
                 contentPadding: EdgeInsets.zero,
                 leading: const CircleAvatar(
-                  backgroundImage: AssetImage('assets/professor.png'),
+                  backgroundImage: NetworkImage('https://icons.iconarchive.com/icons/papirus-team/papirus-status/512/avatar-default-icon.png'),
                 ),
-                title: Text(widget.event.professor.getFullName()),
+                title: Text(widget.event.professor.getFullName(), style: GoogleFonts.poppins(fontSize: 18),),
               ),
             ),
             const SizedBox(height: 15),
-            const Text('Date:', style: TextStyle(fontWeight: FontWeight.bold)),
+            const Text('Date:', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
             Text(
               DateFormat('d MMMM yyyy').format(widget.event.startTime),
+              style: TextStyle(fontSize: 18),
             ),
             const SizedBox(height: 15),
-            const Text('Time:', style: TextStyle(fontWeight: FontWeight.bold)),
+            const Text('Time:', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
             Text(
               '${DateFormat('HH:mm').format(widget.event.startTime)} - ${DateFormat('HH:mm').format(widget.event.endTime)}',
-            ),
+            style: TextStyle(fontSize: 18)),
             const SizedBox(height: 15),
-            const Text('Room:', style: TextStyle(fontWeight: FontWeight.bold)),
-            Text(widget.event.room.name),
+            const Text('Room:', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+            Text(widget.event.room.name, style: TextStyle(fontSize: 18)),
             if (reservedSeat != null) ...[
               const SizedBox(height: 15),
               const Text('Your Reserved Seat:',
-                  style: TextStyle(fontWeight: FontWeight.bold)),
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
               Text(
-                  'Row: ${reservedSeat!.row + 1}, Column: ${String.fromCharCode(65 + reservedSeat!.column)}'),
+                  'Row: ${reservedSeat!.row + 1}, Column: ${String.fromCharCode(65 + reservedSeat!.column)}',
+                  style: TextStyle(fontSize: 18)),
             ],
             const Spacer(),
             ElevatedButton(
@@ -140,7 +143,7 @@ class _EventScreenState extends State<EventScreen> {
                             builder: (context) => AlertDialog(
                               title: const Text(
                                 'Cancel Reservation',
-                                style: TextStyle(color: Colors.black),
+                                style: TextStyle(color: Color(0xFF0D47A1)),
                               ),
                               content: const Text(
                                 'Are you sure you want to cancel your reservation?',
