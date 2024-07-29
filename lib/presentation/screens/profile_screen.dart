@@ -17,6 +17,7 @@ import '../../domain/models/Course.dart';
 import '../../domain/models/CustomUser.dart';
 import 'course_management_screen.dart';
 import 'login_screen.dart';
+import 'my_reservations_screen.dart';  // Import the new screen
 
 class ProfileScreen extends StatefulWidget {
   @override
@@ -94,6 +95,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
+  void _showMyReservations() {
+    if (_user != null) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => MyReservationsScreen(userId: _user!.uid),
+        ),
+      );
+    }
+  }
+
   void _showUserManagement() {
     Navigator.push(
       context,
@@ -169,16 +181,22 @@ class _ProfileScreenState extends State<ProfileScreen> {
               style: TextStyle(fontSize: 20),
             ),
             SizedBox(height: 16),
-              Text(
-                'Enrolled Courses:',
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Color(0xFF0D47A1)),
+            Text(
+              'Enrolled Courses:',
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Color(0xFF0D47A1)),
+            ),
+            SizedBox(height: 8),
+            ..._enrolledCourses.map((course) => Text(
+              course.courseFullName,
+              style: TextStyle(fontSize: 20, color: Colors.black),
+            )),
+            SizedBox(height: 16),
+            if(_user?.isProfessor == false) ...[
+              ElevatedButton(
+                onPressed: _showMyReservations,
+                child: Text('My Reservations'),
               ),
-              SizedBox(height: 8),
-              ..._enrolledCourses.map((course) => Text(
-                course.courseFullName,
-                style: TextStyle(fontSize: 20, color: Colors.black),
-              )),
-              SizedBox(height: 16),
+            ],
             if (_user?.isProfessor == true) ...[
               ElevatedButton(
                 onPressed: _showUserManagement,
@@ -202,25 +220,30 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   void _showImageSourceOptions() {
-    showModalBottomSheet(
+    showDialog(
       context: context,
-      builder: (BuildContext context) {
-        return Wrap(
-          children: <Widget>[
-            ListTile(
-              leading: Icon(Icons.camera),
-              title: Text('Take Photo'),
-              onTap: () {
-                Navigator.pop(context);
-                _pickImageFromCamera();
+      builder: (context) {
+        return AlertDialog(
+          title: Text('Select Image Source'),
+          actions: [
+            TextButton(
+              child: Text('Camera'),
+              onPressed: () {
+                _pickImage(ImageSource.camera);
+                Navigator.of(context).pop();
               },
             ),
-            ListTile(
-              leading: Icon(Icons.photo_library),
-              title: Text('Choose from Gallery'),
-              onTap: () {
-                Navigator.pop(context);
-                _pickImageFromGallery();
+            TextButton(
+              child: Text('Gallery'),
+              onPressed: () {
+                _pickImage(ImageSource.gallery);
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: Text('Cancel'),
+              onPressed: () {
+                Navigator.of(context).pop();
               },
             ),
           ],
@@ -229,49 +252,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  Future<void> _pickImageFromCamera() async {
-    try {
-      final pickedFile = await _imagePicker.pickImage(
-        source: ImageSource.camera,
-      );
+  Future<void> _pickImage(ImageSource source) async {
+    final pickedFile = await _imagePicker.pickImage(source: source);
 
-      if (pickedFile != null) {
-        await _uploadProfileImageAndSetUser(File(pickedFile.path));
-      }
-    } catch (error) {
-      print('Error picking image from camera: $error');
-    }
-  }
-
-  Future<void> _pickImageFromGallery() async {
-    try {
-      final pickedFile = await _imagePicker.pickImage(
-        source: ImageSource.gallery,
-      );
-
-      if (pickedFile != null) {
-        await _uploadProfileImageAndSetUser(File(pickedFile.path));
-      }
-    } catch (error) {
-      print('Error picking image from gallery: $error');
-    }
-  }
-
-  Future<void> _uploadProfileImageAndSetUser(File imageFile) async {
-    try {
-      final storageRef = FirebaseStorage.instance.ref().child('profile_images/${_user!.uid}');
-      final uploadTask = storageRef.putFile(imageFile);
-
-      final snapshot = await uploadTask.whenComplete(() {});
-      final downloadUrl = await snapshot.ref.getDownloadURL();
-
+    if (pickedFile != null) {
+      final imageBytes = await pickedFile.readAsBytes();
       setState(() {
-        _profileImage = Uint8List.fromList(imageFile.readAsBytesSync());
+        _profileImage = imageBytes;
       });
-
-      await _userService.updateUserProfileImage(_user!.uid, downloadUrl);
-    } catch (error) {
-      print('Error uploading profile image: $error');
     }
   }
 }

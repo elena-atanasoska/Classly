@@ -4,6 +4,21 @@ import '../../domain/models/CalendarEvent.dart';
 class EventRepository {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
+  Future<CalendarEvent> getEventById(String id) async {
+    try {
+      DocumentSnapshot documentSnapshot = await _firestore.collection('calendarEvents').doc(id).get();
+
+      if (documentSnapshot.exists) {
+        return CalendarEvent.fromMap(documentSnapshot.data() as Map<String, dynamic>);
+      } else {
+        throw Exception('Event not found');
+      }
+    } catch (error) {
+      print('Error fetching event by ID: $error');
+      rethrow;
+    }
+  }
+
   Future<void> saveCalendarEvent(CalendarEvent event) async {
     await _firestore.collection('calendarEvents').doc(event.id).set(event.toMap());
   }

@@ -152,4 +152,20 @@ class ReservationService {
 
     await batch.commit();
   }
+
+  Future<List<Map<String, dynamic>>> getReservationsForUser(String userId) async {
+    final reservationsSnapshot = await _firestore
+        .collection('reservations')
+        .where('userId', isEqualTo: userId)
+        .get();
+
+    return reservationsSnapshot.docs.map((doc) {
+      final data = doc.data();
+      return {
+        'eventId': data['eventId'],
+        'seat': data['seat'],
+      };
+    }).toList();
+  }
+
 }

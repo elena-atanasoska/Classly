@@ -19,4 +19,8 @@ class EventService {
   Future<List<CalendarEvent>> getEventsForDay(DateTime date, List<String> enrolledCourseIds) async {
     return await _eventRepository.getEventsForDay(date, enrolledCourseIds);
   }
+
+  Future<CalendarEvent> getEventById(String id) async {
+    return await _eventRepository.getEventById(id);
+  }
 }
