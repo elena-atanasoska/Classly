@@ -119,4 +119,22 @@ class UserRepository {
       'enrolledCourses': FieldValue.arrayRemove([course.courseId]),
     });
   }
+
+  Future<List<CustomUser>> getUsersEnrolledInCourse(String courseId) async {
+    try {
+      QuerySnapshot snapshot = await _firestore
+          .collection('custom_users')
+          .where('enrolledCourses', arrayContains: courseId)
+          .get();
+
+      List<CustomUser> enrolledUsers = snapshot.docs
+          .map((doc) => CustomUser.fromDocument(doc))
+          .toList();
+
+      return enrolledUsers;
+    } catch (e) {
+      print('Error fetching users enrolled in course: $e');
+      return [];
+    }
+  }
 }

@@ -109,4 +109,8 @@ class UserService {
   Future<void> disenrollFromCourse(String userId, Course course) async {
     await userRepository.disenrollFromCourse(userId, course);
   }
+
+  Future<List<CustomUser>> getUsersEnrolledInCourse(String courseId) async{
+    return await userRepository.getUsersEnrolledInCourse(courseId);
+  }
 }

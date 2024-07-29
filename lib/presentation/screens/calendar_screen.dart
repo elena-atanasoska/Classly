@@ -129,9 +129,10 @@ class _CalendarScreenState extends State<CalendarScreen> {
       builder: (context) => AddEventForm(
         selectedDate: selectedDate,
         enrolledCourses: enrolledCourses,
-        currentUser: this.currentUser, // Add this line
+        currentUser: this.currentUser,
         onAddEvent: (CalendarEvent event) async {
           await eventService.saveEvent(event);
+          await notificationsService.scheduleEventNotifications(event);
           _loadEventsForCurrentDay(selectedDate);
         },
       ),

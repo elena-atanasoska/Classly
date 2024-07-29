@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../application/services/NotificationsService.dart';
-import '../../domain/models/AppNotification.dart';
-
 
 class NotificationsScreen extends StatefulWidget {
   const NotificationsScreen({Key? key}) : super(key: key);
@@ -13,112 +12,134 @@ class NotificationsScreen extends StatefulWidget {
 }
 
 class _NotificationsScreenState extends State<NotificationsScreen> {
-  List<AppNotification> notifications = [];
+  List<ActiveNotification> activeNotifications = [];
   final NotificationsService notificationsService = NotificationsService();
 
   @override
   void initState() {
     super.initState();
-    _loadNotifications();
+    _loadActiveNotifications();
   }
 
-  Future<void> _loadNotifications() async {
-    List<AppNotification> fetchedNotifications = await notificationsService.getNotifications();
-
+  Future<void> _loadActiveNotifications() async {
+    List<ActiveNotification> fetchedActiveNotifications = await notificationsService.getActiveNotifications();
     setState(() {
-      notifications = fetchedNotifications;
+      activeNotifications = fetchedActiveNotifications;
     });
   }
 
+  Future<void> _clearNotification(int id) async {
+    await notificationsService.cancelNotification(id);
+    _loadActiveNotifications();
+  }
+
+  Future<void> _clearAllNotifications() async {
+    await notificationsService.cancelAllNotifications();
+    _loadActiveNotifications();
+  }
+
+  Future<void> _showClearNotificationsDialog() async {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: true,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Clear Notifications', style: TextStyle(color: Color(0xFF0D47A1)),),
+          content: Text('Do you want to clear all notifications?', style: TextStyle(color: Colors.black)),
+          actions: <Widget>[
+            TextButton(
+              child: Text('Cancel'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: Text('Clear All'),
+              onPressed: () async {
+                await _clearAllNotifications();
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text('Notifications'),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.delete),
+            onPressed: _showClearNotificationsDialog,
+          ),
+        ],
       ),
-      body: notifications.isEmpty
-          ? Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.notifications,
-              size: 100,
-              color: Color(0xFF0D47A1),
-            ),
-            SizedBox(height: 20),
-            Text(
-              'No Notifications',
-              style: TextStyle(fontSize: 18),
-            ),
-          ],
-        ),
-      )
-          : ListView.builder(
-        itemCount: notifications.length,
-        itemBuilder: (context, index) {
-          var groupedNotifications = groupNotificationsByDate(notifications);
-          var dates = groupedNotifications.keys.toList()..sort((a, b) => b.compareTo(a));
+      body: activeNotifications.isEmpty
+          ? _buildEmptyNotifications()
+          : _buildActiveNotificationsList(),
+    );
+  }
 
-          if (index < dates.length) {
-            var date = dates[index];
-            var dateNotifications = groupedNotifications[date]!;
-
-            return Column(
-              children: [
-                ListTile(
-                  title: Text(
-                    formatDate(date),
-                    style: GoogleFonts.poppins(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w400,
-                      color: Color(0xFF0D47A1),
-                    ),
-                  ),
-                ),
-                ...dateNotifications.map((notification) {
-                  return Card(
-                    elevation: 2.0,
-                    color: Color(0xFF0D47A1),
-                    margin: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    child: ListTile(
-                      leading: Icon(
-                        Icons.notifications_active,
-                        color: Colors.white,
-                      ),
-                      title: Text(notification.title, style: GoogleFonts.poppins(color: Colors.white)),
-                      subtitle: Text(notification.body, style: GoogleFonts.poppins(color: Colors.white)),
-                    ),
-                  );
-                }),
-              ],
-            );
-          } else {
-            return SizedBox.shrink();
-          }
-        },
+  Widget _buildEmptyNotifications() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.notifications,
+            size: 100,
+            color: Color(0xFF0D47A1),
+          ),
+          SizedBox(height: 20),
+          Text(
+            'No Active Notifications',
+            style: TextStyle(fontSize: 18),
+          ),
+        ],
       ),
     );
   }
 
-  String formatDate(DateTime dateTime) {
-    return '${dateTime.day.toString().padLeft(2, '0')}.${dateTime.month.toString().padLeft(2, '0')}.${dateTime.year}';
-  }
-
-  Map<DateTime, List<AppNotification>> groupNotificationsByDate(List<AppNotification> notifications) {
-    Map<DateTime, List<AppNotification>> groupedNotifications = {};
-
-    for (var notification in notifications) {
-      var date = DateTime(notification.dateTime.year, notification.dateTime.month, notification.dateTime.day);
-
-      if (groupedNotifications.containsKey(date)) {
-        groupedNotifications[date]!.add(notification);
-      } else {
-        groupedNotifications[date] = [notification];
-      }
-    }
-
-    return groupedNotifications;
+  Widget _buildActiveNotificationsList() {
+    return ListView.builder(
+      itemCount: activeNotifications.length,
+      itemBuilder: (context, index) {
+        var notification = activeNotifications[index];
+        return Dismissible(
+          key: ValueKey(notification.id),
+          background: Container(color: Colors.white),
+          onDismissed: (direction) async {
+            if (notification.id != null) {
+              await _clearNotification(notification.id!);
+            }
+          },
+          child: Card(
+            elevation: 2.0,
+            color: Color(0xFF0D47A1),
+            margin: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            child: ListTile(
+              leading: Icon(
+                Icons.notifications_active,
+                color: Colors.white,
+              ),
+              title: Text(notification.title ?? 'No Title', style: GoogleFonts.poppins(color: Colors.white)),
+              subtitle: Text(notification.body ?? 'No Details', style: GoogleFonts.poppins(color: Colors.white)),
+              trailing: IconButton(
+                icon: Icon(Icons.clear, color: Colors.white),
+                onPressed: () async {
+                  if (notification.id != null) {
+                    await _clearNotification(notification.id!);
+                  }
+                },
+              ),
+            ),
+          ),
+        );
+      },
+    );
   }
 }
