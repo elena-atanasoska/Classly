@@ -1,3 +1,4 @@
+import 'package:classly/presentation/screens/professor_details_screen.dart';
 import 'package:classly/presentation/screens/reserve_seat_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -107,8 +108,21 @@ class _EventScreenState extends State<EventScreen> {
                 leading: const CircleAvatar(
                   backgroundImage: NetworkImage('https://icons.iconarchive.com/icons/papirus-team/papirus-status/512/avatar-default-icon.png'),
                 ),
-                title: Text(widget.event.professor.getFullName(), style: GoogleFonts.poppins(fontSize: 18),),
-              ),
+                  title: GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => ProfessorDetailsScreen(professor: widget.event.professor),
+                        ),
+                      );
+                    },
+                    child: Text(
+                      widget.event.professor.getFullName(),
+                      style: GoogleFonts.poppins(fontSize: 18, color: Colors.blue),
+                    ),
+                  ),
+                ),
             ),
             const SizedBox(height: 15),
             const Text('Date:', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
