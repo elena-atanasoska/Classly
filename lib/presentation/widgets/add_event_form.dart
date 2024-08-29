@@ -156,7 +156,7 @@ class _AddEventFormState extends State<AddEventForm> {
                     TextFormField(
                       controller: titleController,
                       decoration: InputDecoration(
-                        labelText: 'Enter event title',
+                        labelText: 'Event title',
                       ),
                       style: GoogleFonts.poppins(),
                       validator: (value) {
@@ -172,14 +172,14 @@ class _AddEventFormState extends State<AddEventForm> {
                       decoration:
                           InputDecoration(labelText: 'Date (YYYY-MM-DD)'),
                       style: GoogleFonts.poppins(),
-                      enabled: false, // Disable date editing
+                      enabled: true,
                     ),
                     SizedBox(height: 15.0),
                     TextField(
                       controller: timeController,
                       decoration: InputDecoration(labelText: 'Time (HH:MM)'),
                       style: GoogleFonts.poppins(),
-                      enabled: false, // Disable time editing
+                      enabled: true,
                     ),
                     SizedBox(height: 15.0),
                     SwitchListTile(

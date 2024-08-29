@@ -1,3 +1,4 @@
+import 'package:classly/presentation/screens/professor_details_screen.dart';
 import 'package:classly/presentation/screens/reserve_seat_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -5,7 +6,9 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 
 import '../../application/services/ReservationService.dart';
+import '../../application/services/UserService.dart';
 import '../../domain/models/CalendarEvent.dart';
+import '../../domain/models/CustomUser.dart';
 import '../../domain/models/Seat.dart';
 
 class EventScreen extends StatefulWidget {
@@ -20,12 +23,17 @@ class EventScreen extends StatefulWidget {
 class _EventScreenState extends State<EventScreen> {
   Seat? reservedSeat;
   bool isLoading = true;
+  bool isProfessor = false;
+  bool isEventInThePast = false;
   final ReservationService _reservationService = ReservationService();
+  final UserService _userService = UserService();
 
   @override
   void initState() {
     super.initState();
     _checkReservation();
+    _checkIfProfessor();
+    _checkIfEventInThePast();
   }
 
   Future<void> _checkReservation() async {
@@ -53,6 +61,25 @@ class _EventScreenState extends State<EventScreen> {
       );
     }
   }
+  Future<void> _checkIfProfessor() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      CustomUser? userFromService = await _userService.getUser(user.uid);
+      isProfessor = userFromService!.isProfessor;
+      setState(() {});
+    }
+  }
+
+  void _checkIfEventInThePast() {
+    DateTime eventStartDate = widget.event.startTime; // Replace with your actual event start date retrieval
+    DateTime eventEndDate = widget.event.endTime;     // Replace with your actual event end date retrieval
+    DateTime now = DateTime.now();
+
+    setState(() {
+      isEventInThePast = now.isAfter(eventStartDate);
+    });
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -107,8 +134,21 @@ class _EventScreenState extends State<EventScreen> {
                 leading: const CircleAvatar(
                   backgroundImage: NetworkImage('https://icons.iconarchive.com/icons/papirus-team/papirus-status/512/avatar-default-icon.png'),
                 ),
-                title: Text(widget.event.professor.getFullName(), style: GoogleFonts.poppins(fontSize: 18),),
-              ),
+                  title: GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => ProfessorDetailsScreen(professor: widget.event.professor),
+                        ),
+                      );
+                    },
+                    child: Text(
+                      widget.event.professor.getFullName(),
+                      style: GoogleFonts.poppins(fontSize: 18, color: Colors.blue),
+                    ),
+                  ),
+                ),
             ),
             const SizedBox(height: 15),
             const Text('Date:', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
@@ -136,49 +176,51 @@ class _EventScreenState extends State<EventScreen> {
             ElevatedButton(
               onPressed: isLoading
                   ? null
+                  : isEventInThePast && !isProfessor
+                  ? null
                   : reservedSeat != null
-                      ? () async {
-                          bool? confirmCancel = await showDialog<bool>(
-                            context: context,
-                            builder: (context) => AlertDialog(
-                              title: const Text(
-                                'Cancel Reservation',
-                                style: TextStyle(color: Color(0xFF0D47A1)),
-                              ),
-                              content: const Text(
-                                'Are you sure you want to cancel your reservation?',
-                                style: TextStyle(color: Colors.black),
-                              ),
-                              actions: [
-                                TextButton(
-                                  onPressed: () =>
-                                      Navigator.of(context).pop(false),
-                                  child: const Text('No'),
-                                ),
-                                TextButton(
-                                  onPressed: () =>
-                                      Navigator.of(context).pop(true),
-                                  child: const Text('Yes'),
-                                ),
-                              ],
-                            ),
-                          );
-                          if (confirmCancel == true) {
-                            _cancelReservation();
-                          }
-                        }
-                      : () async {
-                          final result = await Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) =>
-                                  ReserveSeatScreen(event: widget.event),
-                            ),
-                          );
-                          if (result == true) {
-                            _checkReservation();
-                          }
-                        },
+                  ? () async {
+                bool? confirmCancel = await showDialog<bool>(
+                  context: context,
+                  builder: (context) => AlertDialog(
+                    title: const Text(
+                      'Cancel Reservation',
+                      style: TextStyle(color: Color(0xFF0D47A1)),
+                    ),
+                    content: const Text(
+                      'Are you sure you want to cancel your reservation?',
+                      style: TextStyle(color: Colors.black),
+                    ),
+                    actions: [
+                      TextButton(
+                        onPressed: () =>
+                            Navigator.of(context).pop(false),
+                        child: const Text('No'),
+                      ),
+                      TextButton(
+                        onPressed: () =>
+                            Navigator.of(context).pop(true),
+                        child: const Text('Yes'),
+                      ),
+                    ],
+                  ),
+                );
+                if (confirmCancel == true) {
+                  _cancelReservation();
+                }
+              }
+                  : () async {
+                final result = await Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) =>
+                        ReserveSeatScreen(event: widget.event),
+                  ),
+                );
+                if (result == true) {
+                  _checkReservation();
+                }
+              },
               style: ElevatedButton.styleFrom(
                 foregroundColor: Colors.white,
                 backgroundColor: Colors.blue,
@@ -186,10 +228,13 @@ class _EventScreenState extends State<EventScreen> {
               ),
               child: isLoading
                   ? const CircularProgressIndicator(color: Colors.white)
-                  : Text(reservedSeat != null
-                      ? 'Cancel Reservation'
-                      : 'Reserve your seat'),
+                  : Text(isProfessor
+                  ? 'See Attendees'
+                  : reservedSeat != null
+                  ? 'Cancel Reservation'
+                  : 'Reserve your seat'),
             ),
+
           ],
         ),
       ),

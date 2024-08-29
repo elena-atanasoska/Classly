@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:classly/application/services/CourseService.dart';
@@ -6,10 +5,9 @@ import 'package:classly/application/services/RoomService.dart';
 import 'package:classly/presentation/screens/room_management_screen.dart';
 import 'package:classly/presentation/screens/user_management_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:http/http.dart' as http;
+import 'package:image_picker/image_picker.dart';
 
 import '../../application/services/AuthService.dart';
 import '../../application/services/UserService.dart';
@@ -17,7 +15,7 @@ import '../../domain/models/Course.dart';
 import '../../domain/models/CustomUser.dart';
 import 'course_management_screen.dart';
 import 'login_screen.dart';
-import 'my_reservations_screen.dart';  // Import the new screen
+import 'my_reservations_screen.dart'; // Import the new screen
 
 class ProfileScreen extends StatefulWidget {
   @override
@@ -78,7 +76,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   Future<void> _fetchEnrolledCourses(String userId) async {
     try {
-      List<Course> enrolledCourses = await _userService.getEnrolledCourses(userId);
+      List<Course> enrolledCourses =
+          await _userService.getEnrolledCourses(userId);
       setState(() {
         _enrolledCourses = enrolledCourses;
       });
@@ -121,7 +120,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => CourseManagementScreen(courseService: _courseService),
+        builder: (context) =>
+            CourseManagementScreen(courseService: _courseService),
       ),
     );
   }
@@ -139,81 +139,127 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('My Profile'),
+        title: const Text('My Profile'),
         actions: [
           IconButton(
-            icon: Icon(Icons.exit_to_app),
+            icon: const Icon(Icons.exit_to_app),
             onPressed: _logout,
           ),
         ],
       ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: [
-            GestureDetector(
-              onTap: _showImageSourceOptions,
-              child: CircleAvatar(
-                radius: 70,
-                backgroundImage: _profileImage != null
-                    ? MemoryImage(_profileImage!)
-                    : NetworkImage('https://icons.iconarchive.com/icons/papirus-team/papirus-status/512/avatar-default-icon.png') as ImageProvider,
-              ),
+      body: SafeArea(
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                GestureDetector(
+                  onTap: _showImageSourceOptions,
+                  child: CircleAvatar(
+                    radius: 70,
+                    backgroundImage: _profileImage != null
+                        ? MemoryImage(_profileImage!)
+                        : const NetworkImage(
+                                'https://icons.iconarchive.com/icons/papirus-team/papirus-status/512/avatar-default-icon.png')
+                            as ImageProvider,
+                  ),
+                ),
+                const SizedBox(height: 30),
+                const Text(
+                  'Name:',
+                  style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF0D47A1)),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  _user?.getFullName() ?? 'No name available',
+                  style: const TextStyle(fontSize: 20),
+                ),
+                const SizedBox(height: 16),
+                const Text(
+                  'Role:',
+                  style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF0D47A1)),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  _user?.role.name ?? 'No name available',
+                  style: const TextStyle(fontSize: 20),
+                ),
+                const SizedBox(height: 8),
+                const Text(
+                  'Email:',
+                  style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF0D47A1)),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  _user?.email ?? 'No email available',
+                  style: const TextStyle(fontSize: 20),
+                ),
+                const SizedBox(height: 16),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    const Text(
+                      'Enrolled Courses:',
+                      style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xFF0D47A1)),
+                    ),
+                    const SizedBox(height: 8),
+                    Column(
+                      children: _enrolledCourses.map((course) => Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Flexible(
+                            child: Text(
+                              course.courseFullName,
+                              style: const TextStyle(fontSize: 20, color: Colors.black),
+                              textAlign: TextAlign.center, // Center the text
+                              overflow: TextOverflow.visible, // Allow text to wrap
+                              softWrap: true, // Enable wrapping
+                            ),
+                          ),
+                        ],
+                      )).toList(),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                if (_user?.isProfessor == false) ...[
+                  ElevatedButton(
+                    onPressed: _showMyReservations,
+                    child: const Text('My Reservations'),
+                  ),
+                ],
+                if (_user?.isProfessor == true) ...[
+                  ElevatedButton(
+                    onPressed: _showUserManagement,
+                    child: const Text('Manage Users'),
+                  ),
+                  const SizedBox(height: 15.0),
+                  ElevatedButton(
+                    onPressed: _showCourseManagement,
+                    child: const Text('Manage Courses'),
+                  ),
+                  const SizedBox(height: 15.0),
+                  ElevatedButton(
+                    onPressed: _showRoomManagement,
+                    child: const Text('Manage Rooms'),
+                  ),
+                ],
+              ],
             ),
-            SizedBox(height: 30),
-            Text(
-              'Name:',
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Color(0xFF0D47A1)),
-            ),
-            SizedBox(height: 8),
-            Text(
-              _user?.getFullName() ?? 'No name available',
-              style: TextStyle(fontSize: 20),
-            ),
-            SizedBox(height: 16),
-            const Text(
-              'Email:',
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Color(0xFF0D47A1)),
-            ),
-            SizedBox(height: 8),
-            Text(
-              _user?.email ?? 'No email available',
-              style: TextStyle(fontSize: 20),
-            ),
-            SizedBox(height: 16),
-            Text(
-              'Enrolled Courses:',
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Color(0xFF0D47A1)),
-            ),
-            SizedBox(height: 8),
-            ..._enrolledCourses.map((course) => Text(
-              course.courseFullName,
-              style: TextStyle(fontSize: 20, color: Colors.black),
-            )),
-            SizedBox(height: 16),
-            if(_user?.isProfessor == false) ...[
-              ElevatedButton(
-                onPressed: _showMyReservations,
-                child: Text('My Reservations'),
-              ),
-            ],
-            if (_user?.isProfessor == true) ...[
-              ElevatedButton(
-                onPressed: _showUserManagement,
-                child: Text('Manage Users'),
-              ),
-              SizedBox(height: 15.0),
-              ElevatedButton(
-                onPressed: _showCourseManagement,
-                child: Text('Manage Courses'),
-              ),
-              SizedBox(height: 15.0),
-              ElevatedButton(
-                onPressed: _showRoomManagement,
-                child: Text('Manage Rooms'),
-              ),
-            ],
-          ],
+          ),
         ),
       ),
     );
@@ -224,24 +270,24 @@ class _ProfileScreenState extends State<ProfileScreen> {
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: Text('Select Image Source'),
+          title: const Text('Select Image Source'),
           actions: [
             TextButton(
-              child: Text('Camera'),
+              child: const Text('Camera'),
               onPressed: () {
                 _pickImage(ImageSource.camera);
                 Navigator.of(context).pop();
               },
             ),
             TextButton(
-              child: Text('Gallery'),
+              child: const Text('Gallery'),
               onPressed: () {
                 _pickImage(ImageSource.gallery);
                 Navigator.of(context).pop();
               },
             ),
             TextButton(
-              child: Text('Cancel'),
+              child: const Text('Cancel'),
               onPressed: () {
                 Navigator.of(context).pop();
               },

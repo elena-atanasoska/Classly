@@ -33,7 +33,12 @@ class _CalendarScreenState extends State<CalendarScreen> {
   @override
   void initState() {
     super.initState();
-    _loadUser();
+    _initialize();
+
+  }
+
+  Future<void> _initialize() async {
+    await _loadUser();
     _loadEventsForCurrentDay(DateTime.now());
   }
 
@@ -53,7 +58,6 @@ class _CalendarScreenState extends State<CalendarScreen> {
   }
 
   Future<void> _loadEventsForCurrentDay(DateTime date) async {
-    if (currentUser != null) {
       List<Course> enrolledCourses = await _getEnrolledCourses();
       List<String> enrolledCourseIds = enrolledCourses.map((course) => course.courseId).toList();
 
@@ -64,6 +68,31 @@ class _CalendarScreenState extends State<CalendarScreen> {
         appointments = eventsForCurrentDay;
         events = MeetingDataSource(appointments);
       });
+
+  }
+
+  Future<void> _loadEventsForDateRange(List<DateTime> visibleDates) async {
+    print(visibleDates);
+    if (currentUser != null && visibleDates.isNotEmpty) {
+      try {
+        // Fetch enrolled courses
+        List<Course> enrolledCourses = await _getEnrolledCourses();
+        List<String> enrolledCourseIds = enrolledCourses.map((course) => course.courseId).toList();
+
+        // Fetch events for the date range
+        List<CalendarEvent> eventsForDateRange = await eventService.getEventsForDateRange(visibleDates.first, visibleDates.last, enrolledCourseIds);
+
+        // Debug prints
+        print('Fetched events: $eventsForDateRange');
+
+        setState(() {
+          appointments = eventsForDateRange;
+          events = MeetingDataSource(appointments);
+        });
+      } catch (e) {
+        // Handle or log errors
+        print('Error loading events: $e');
+      }
     }
   }
 
@@ -97,16 +126,14 @@ class _CalendarScreenState extends State<CalendarScreen> {
               CalendarView.month,
             ],
             onTap: (CalendarTapDetails details) {
-              if (details.appointments != null &&
-                  details.appointments!.isNotEmpty) {
+              if (details.appointments != null && details.appointments!.isNotEmpty) {
                 _showEventDetailsDialog(details.appointments![0]);
-              } else if (details.targetElement ==
-                  CalendarElement.calendarCell) {
+              } else if (details.targetElement == CalendarElement.calendarCell && currentUser?.isProfessor == true) {
                 _showAddEventForm(details.date!);
               }
             },
             onViewChanged: (ViewChangedDetails details) {
-              _loadEventsForCurrentDay(details.visibleDates[0]);
+              _loadEventsForDateRange(details.visibleDates);
             },
           ),
         ],

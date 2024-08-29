@@ -86,13 +86,13 @@ class _AddEventDialogState extends State<AddEventDialog> {
               TextField(
                 controller: dateController,
                 decoration: InputDecoration(labelText: 'Date (YYYY-MM-DD)'),
-                enabled: false, // Disable date editing
+                enabled: true,
               ),
               SizedBox(height: 15.0),
               TextField(
                 controller: timeController,
                 decoration: InputDecoration(labelText: 'Time (HH:MM)'),
-                enabled: false, // Disable time editing
+                enabled: true,
               ),
               SizedBox(height: 15.0),
               TextField(
