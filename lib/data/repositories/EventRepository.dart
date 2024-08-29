@@ -50,6 +50,25 @@ class EventRepository {
     }
   }
 
+  Future<List<CalendarEvent>> getEventsForDateRange(DateTime startDate, DateTime endDate, List<String> courseIds) async {
+    try {
+      Query query = _firestore
+          .collection('calendarEvents')
+          .where('startTime', isGreaterThanOrEqualTo: DateTime.parse(formatDate(startDate)))
+          .where('startTime', isLessThanOrEqualTo:  DateTime.parse(formatDate(endDate)).add(const Duration(days: 1)))
+          .where('course.courseId', whereIn: courseIds);
+
+      QuerySnapshot querySnapshot = await query.get();
+
+      return querySnapshot.docs.map((DocumentSnapshot document) {
+        return CalendarEvent.fromMap(document.data() as Map<String, dynamic>);
+      }).toList();
+    } catch (error) {
+      print('Error fetching events for date range: $error');
+      return [];
+    }
+  }
+
   String formatDate(DateTime dateTime) {
     return '${dateTime.year}-${dateTime.month.toString().padLeft(2, '0')}-${dateTime.day.toString().padLeft(2, '0')}';
   }
